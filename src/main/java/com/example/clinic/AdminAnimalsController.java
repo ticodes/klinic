@@ -1,8 +1,13 @@
 package com.example.clinic;
 
 import java.net.URL;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.ResourceBundle;
+
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
@@ -76,6 +81,8 @@ public class AdminAnimalsController {
     void initialize() throws SQLException, ClassNotFoundException {
         fillTable();
         getDataField();
+        fillChoiseBreed();
+        fillChoiseOwner();
         administrators();
         doctors();
         owners();
@@ -140,6 +147,26 @@ public class AdminAnimalsController {
 
         });
     }
+    public void fillChoiseBreed(){
+        List<Breeds> animals = dbHandler.getTableBreeds();
+        ObservableList<String> columnValues = FXCollections.observableArrayList();
+
+        for (Breeds breed : animals) {
+            String columnValue = breed.getName();
+            columnValues.add(columnValue);
+            fieldBreed.setItems(columnValues);
+        }
+    }
+    public void fillChoiseOwner(){
+        List<Owners> owners = dbHandler.getTableOwners();
+        ObservableList<String> columnValues = FXCollections.observableArrayList();
+
+        for (Owners owner : owners) {
+            String columnValue = owner.getName() + ", " + owner.getTelephone();
+            columnValues.add(columnValue);
+            fieldOwner.setItems(columnValues);
+        }
+    }
     @FXML
     void getDataField (){
         tableAnimals.setOnMouseClicked(mouseEvent -> {
@@ -151,5 +178,7 @@ public class AdminAnimalsController {
             }
         });
     }
+
+
 
 }

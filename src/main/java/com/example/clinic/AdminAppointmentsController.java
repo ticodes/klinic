@@ -3,9 +3,12 @@ package com.example.clinic;
 import java.net.URL;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.ResourceBundle;
 
 import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
@@ -89,6 +92,9 @@ public class AdminAppointmentsController {
     void initialize() throws SQLException, ClassNotFoundException {
         fillTable();
         getDataField();
+        fillChoiseOwner();
+        fillChoiseDoctor();
+        fillChoiseAnimal();
         account();
         administrators();
         doctors();
@@ -166,6 +172,36 @@ public class AdminAppointmentsController {
                 fieldAnimal.setValue(appointment.getAnimal());
             }
         });
+    }
+    public void fillChoiseOwner(){
+        List<Owners> owners = dbHandler.getTableOwners();
+        ObservableList<String> columnValues = FXCollections.observableArrayList();
+
+        for (Owners owner : owners) {
+            String columnValue = owner.getName() + ", " + owner.getTelephone();
+            columnValues.add(columnValue);
+            fieldOwner.setItems(columnValues);
+        }
+    }
+    public void fillChoiseDoctor(){
+        List<Doctors> doctors = dbHandler.getTableDoctors();
+        ObservableList<String> columnValues = FXCollections.observableArrayList();
+
+        for (Doctors doctor : doctors) {
+            String columnValue = doctor.getName() + ", " + doctor.getTelephone();
+            columnValues.add(columnValue);
+            fieldDoctor.setItems(columnValues);
+        }
+    }
+    public void fillChoiseAnimal(){
+        List<Animals> animals = dbHandler.getTableAnimals();
+        ObservableList<String> columnValues = FXCollections.observableArrayList();
+
+        for (Animals animal : animals) {
+            String columnValue = animal.getName() + " - " + animal.getBreed();
+            columnValues.add(columnValue);
+            fieldAnimal.setItems(columnValues);
+        }
     }
 
 }

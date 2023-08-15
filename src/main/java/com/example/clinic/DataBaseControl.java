@@ -264,4 +264,5 @@ public class DataBaseControl {
 
         return animals;
     }
+
 }
