@@ -70,8 +70,50 @@ public class AdminAnimalsController {
 
     @FXML
     void initialize() {
-       
 
+        administrators();
+        doctors();
+        owners();
+        appointments();
+        breeds();
+        account();
+    }
+
+    public void administrators(){
+        administrators.setOnAction(event -> {
+            Window.changeWindow(event, "adminAdministrators.fxml", "Ветеринарная клиника");
+
+        });
+    }
+    public void doctors(){
+        doctors.setOnAction(event -> {
+            Window.changeWindow(event, "adminDoctors.fxml", "Ветеринарная клиника");
+
+        });
+    }
+    public void owners(){
+        owners.setOnAction(event -> {
+            Window.changeWindow(event, "adminOwners.fxml", "Ветеринарная клиника");
+
+        });
+    }
+    public void appointments(){
+        appointments.setOnAction(event -> {
+            Window.changeWindow(event, "adminAppointments.fxml", "Ветеринарная клиника");
+
+        });
+    }
+    public void breeds(){
+        breeds.setOnAction(event -> {
+            Window.changeWindow(event, "adminBreeds.fxml", "Ветеринарная клиника");
+
+        });
+    }
+    public void account(){
+        account.setOnAction(event -> {
+            Window.changeWindow(event, "menuAdmin.fxml", "Ветеринарная клиника");
+
+        });
     }
 
 }

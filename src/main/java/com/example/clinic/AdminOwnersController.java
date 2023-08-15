@@ -88,6 +88,8 @@ public class AdminOwnersController {
         administrators();
         doctors();
         appointments();
+        animals();
+        breeds();
 
     }
     public void account(){
@@ -134,6 +136,18 @@ public class AdminOwnersController {
         configureColumn(telephone, "telephone");
         configureColumn(login, "login");
         tableadmins.setItems(owner.getObservableList());
+    }
+    public void animals(){
+        animals.setOnAction(event -> {
+            Window.changeWindow(event, "adminAnimals.fxml", "Ветеринарная клиника");
+
+        });
+    }
+    public void breeds(){
+        breeds.setOnAction(event -> {
+            Window.changeWindow(event, "adminBreeds.fxml", "Ветеринарная клиника");
+
+        });
     }
 
 }

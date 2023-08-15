@@ -89,6 +89,8 @@ public class AdminAdministratorsController {
         doctors();
         owners();
         appointments();
+        animals();
+        breeds();
     }
     public void account(){
         account.setOnAction(event -> {
@@ -134,6 +136,18 @@ public class AdminAdministratorsController {
         configureColumn(secondName, "secondName");
         configureColumn(login, "login");
         tableadmins.setItems(admins.getAdmins());
+    }
+    public void animals(){
+        animals.setOnAction(event -> {
+            Window.changeWindow(event, "adminAnimals.fxml", "Ветеринарная клиника");
+
+        });
+    }
+    public void breeds(){
+        breeds.setOnAction(event -> {
+            Window.changeWindow(event, "adminBreeds.fxml", "Ветеринарная клиника");
+
+        });
     }
 
 }

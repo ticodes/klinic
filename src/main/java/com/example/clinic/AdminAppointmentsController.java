@@ -89,6 +89,8 @@ public class AdminAppointmentsController {
         administrators();
         doctors();
         owners();
+        animals();
+        breeds();
 
     }
     public void account(){
@@ -135,6 +137,18 @@ public class AdminAppointmentsController {
         configureColumn(owner, "owner");
         configureColumn(animal, "animal");
         tableappointment.setItems(appoint.getObservableList());
+    }
+    public void animals(){
+        animals.setOnAction(event -> {
+            Window.changeWindow(event, "adminAnimals.fxml", "Ветеринарная клиника");
+
+        });
+    }
+    public void breeds(){
+        breeds.setOnAction(event -> {
+            Window.changeWindow(event, "adminBreeds.fxml", "Ветеринарная клиника");
+
+        });
     }
 
 }
