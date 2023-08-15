@@ -207,8 +207,8 @@ public class DataBaseControl {
             resultSet = prSt.executeQuery();
             while (resultSet.next()) {
                 String datetime = resultSet.getString("date") + " " + resultSet.getString("time");
-                String doctor = resultSet.getString("doctors.name") + " " + resultSet.getString("telephone");
-                String owner = resultSet.getString("owners.name") + " " + resultSet.getString("telephone");
+                String doctor = resultSet.getString("doctors.name") + ", " + resultSet.getString("telephone");
+                String owner = resultSet.getString("owners.name") + ", " + resultSet.getString("telephone");
                 String animal = resultSet.getString("animals.name") + " - " + resultSet.getString("breeds.name");
                 Appointments appointment = new Appointments(datetime, doctor, owner, animal);
                 appointments.add(appointment);
@@ -218,5 +218,48 @@ public class DataBaseControl {
         }
 
         return appointments;
+    }
+    public List<Breeds> getTableBreeds() {
+        List<Breeds> breeds = new ArrayList<>();
+        ResultSet resultSet = null;
+        String select = "SELECT * FROM breeds";
+
+        try {
+            PreparedStatement prSt = getInstance().getDbConnection().prepareStatement(select);
+
+            resultSet = prSt.executeQuery();
+            while (resultSet.next()) {
+                String id = resultSet.getString("id");
+                String name = resultSet.getString("name");
+                Breeds breed = new Breeds(id, name);
+                breeds.add(breed);
+            }
+        } catch (SQLException | ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+
+        return breeds;
+    }
+    public List<Animals> getTableAnimals() {
+        List<Animals> animals = new ArrayList<>();
+        ResultSet resultSet = null;
+        String select = "SELECT * FROM animals JOIN breeds ON animals.id_breed = breeds.id JOIN owners ON owners.id_animal = animals.id";
+
+        try {
+            PreparedStatement prSt = getInstance().getDbConnection().prepareStatement(select);
+
+            resultSet = prSt.executeQuery();
+            while (resultSet.next()) {
+                String name = resultSet.getString("animals.name");
+                String breed = resultSet.getString("breeds.name");
+                String owner = resultSet.getString("owners.name") + ", " + resultSet.getString("owners.telephone");
+                Animals animal = new Animals(name, breed, owner);
+                animals.add(animal);
+            }
+        } catch (SQLException | ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+
+        return animals;
     }
 }
