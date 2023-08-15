@@ -7,15 +7,27 @@ import java.sql.SQLException;
 
 public class Appointments {
     private ObservableList<Appointments> appointmentsObesrvableList;
+    private String date;
+    private String time;
     private String datetime;
     private String doctor;
     private String owner;
 
-    public Appointments(String datetime, String doctor, String owner, String animal) {
+    public String getDatetime() {
+        return datetime;
+    }
+
+    public void setDatetime(String datetime) {
         this.datetime = datetime;
+    }
+
+    public Appointments(String date, String time , String doctor, String owner, String animal, String datetime) {
+        this.date = date;
+        this.time = time;
         this.doctor = doctor;
         this.owner = owner;
         this.animal = animal;
+        this.datetime = datetime;
     }
     public Appointments(){
 
@@ -35,12 +47,20 @@ public class Appointments {
         this.animal = animal;
     }
 
-    public String getDatetime() {
-        return datetime;
+    public String getDate() {
+        return date;
     }
 
-    public void setDatetime(String date) {
-        this.datetime = date;
+    public void setDate(String date) {
+        this.date = date;
+    }
+
+    public String getTime() {
+        return time;
+    }
+
+    public void setTime(String time) {
+        this.time = time;
     }
 
     public String getDoctor() {

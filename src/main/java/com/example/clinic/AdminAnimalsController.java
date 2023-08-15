@@ -35,7 +35,7 @@ public class AdminAnimalsController {
     private Button appointments;
 
     @FXML
-    private TableColumn<?, ?> breed;
+    private TableColumn<Animals, String> breed;
 
     @FXML
     private Button breeds;
@@ -50,13 +50,13 @@ public class AdminAnimalsController {
     private Button doctors;
 
     @FXML
-    private ChoiceBox<?> fieldBreed;
+    private ChoiceBox<String> fieldBreed;
 
     @FXML
     private TextField fieldName;
 
     @FXML
-    private ChoiceBox<?> fieldOwner;
+    private ChoiceBox<String> fieldOwner;
 
     @FXML
     private TableColumn<Animals, String> name;
@@ -75,6 +75,7 @@ public class AdminAnimalsController {
     @FXML
     void initialize() throws SQLException, ClassNotFoundException {
         fillTable();
+        getDataField();
         administrators();
         doctors();
         owners();
@@ -137,6 +138,17 @@ public class AdminAnimalsController {
         account.setOnAction(event -> {
             Window.changeWindow(event, "menuAdmin.fxml", "Ветеринарная клиника");
 
+        });
+    }
+    @FXML
+    void getDataField (){
+        tableAnimals.setOnMouseClicked(mouseEvent -> {
+            if(!tableAnimals.getSelectionModel().isEmpty()) {
+                Animals animal = tableAnimals.getSelectionModel().getSelectedItem();
+                fieldName.setText(animal.getName());
+                fieldBreed.setValue(animal.getBreed());
+                fieldOwner.setValue(animal.getOwner());
+            }
         });
     }
 

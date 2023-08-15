@@ -206,11 +206,13 @@ public class DataBaseControl {
 
             resultSet = prSt.executeQuery();
             while (resultSet.next()) {
-                String datetime = resultSet.getString("date") + " " + resultSet.getString("time");
+                String date = resultSet.getString("date");
+                String time = resultSet.getString("time");
+                String datetime = resultSet.getString("date")  + " " + resultSet.getString("time");
                 String doctor = resultSet.getString("doctors.name") + ", " + resultSet.getString("telephone");
                 String owner = resultSet.getString("owners.name") + ", " + resultSet.getString("telephone");
                 String animal = resultSet.getString("animals.name") + " - " + resultSet.getString("breeds.name");
-                Appointments appointment = new Appointments(datetime, doctor, owner, animal);
+                Appointments appointment = new Appointments(date, time, doctor, owner, animal, datetime);
                 appointments.add(appointment);
             }
         } catch (SQLException | ClassNotFoundException e) {

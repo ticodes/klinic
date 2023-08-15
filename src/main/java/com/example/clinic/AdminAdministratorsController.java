@@ -85,6 +85,7 @@ public class AdminAdministratorsController {
     @FXML
     void initialize() throws SQLException, ClassNotFoundException {
         fillTable();
+        getDataField();
         account();
         doctors();
         owners();
@@ -147,6 +148,18 @@ public class AdminAdministratorsController {
         breeds.setOnAction(event -> {
             Window.changeWindow(event, "adminBreeds.fxml", "Ветеринарная клиника");
 
+        });
+    }
+    @FXML
+    void getDataField (){
+        tableadmins.setOnMouseClicked(mouseEvent -> {
+            if(!tableadmins.getSelectionModel().isEmpty()) {
+                Administrators admin = tableadmins.getSelectionModel().getSelectedItem();
+                fieldFirstName.setText(admin.getFirstName());
+                fieldLastName.setText(admin.getLastName());
+                fieldSecondName.setText(admin.getSecondName());
+                fieldLogin.setText(admin.getLogin());
+            }
         });
     }
 

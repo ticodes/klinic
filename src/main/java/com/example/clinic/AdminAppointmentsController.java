@@ -2,7 +2,10 @@ package com.example.clinic;
 
 import java.net.URL;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.ResourceBundle;
+
+import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
@@ -57,13 +60,13 @@ public class AdminAppointmentsController {
     private Button doctors;
 
     @FXML
-    private ChoiceBox<?> fieldAnimal;
+    private ChoiceBox<String> fieldAnimal;
 
     @FXML
-    private ChoiceBox<?> fieldDoctor;
+    private ChoiceBox<String> fieldDoctor;
 
     @FXML
-    private ChoiceBox<?> fieldOwner;
+    private ChoiceBox<String> fieldOwner;
 
     @FXML
     private DatePicker fielddate;
@@ -85,6 +88,7 @@ public class AdminAppointmentsController {
     @FXML
     void initialize() throws SQLException, ClassNotFoundException {
         fillTable();
+        getDataField();
         account();
         administrators();
         doctors();
@@ -148,6 +152,19 @@ public class AdminAppointmentsController {
         breeds.setOnAction(event -> {
             Window.changeWindow(event, "adminBreeds.fxml", "Ветеринарная клиника");
 
+        });
+    }
+    @FXML
+    void getDataField (){
+        tableappointment.setOnMouseClicked(mouseEvent -> {
+            if(!tableappointment.getSelectionModel().isEmpty()) {
+                Appointments appointment = tableappointment.getSelectionModel().getSelectedItem();
+                fielddate.setValue(LocalDate.parse(appointment.getDate()));
+                fieldtime.setText(appointment.getTime());
+                fieldDoctor.setValue(appointment.getDoctor());
+                fieldOwner.setValue(appointment.getOwner());
+                fieldAnimal.setValue(appointment.getAnimal());
+            }
         });
     }
 
