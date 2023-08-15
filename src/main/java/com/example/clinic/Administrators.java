@@ -51,4 +51,8 @@ public class Administrators extends User{
     public Administrators(){
 
     }
+    public ObservableList<Administrators> getAdmins() throws SQLException, ClassNotFoundException {
+        adminObesrvableList = FXCollections.observableArrayList(DataBaseControl.getInstance().getTableAdmins());
+        return adminObesrvableList;
+    }
 }

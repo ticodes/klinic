@@ -1,6 +1,7 @@
 package com.example.clinic;
 
 import java.net.URL;
+import java.sql.SQLException;
 import java.util.ResourceBundle;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -8,6 +9,7 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.cell.PropertyValueFactory;
 
 public class AdminOwnersController {
 
@@ -24,7 +26,7 @@ public class AdminOwnersController {
     private Button add;
 
     @FXML
-    private TableColumn<?, ?> address;
+    private TableColumn<Owners, String> address;
 
     @FXML
     private Button administrators;
@@ -63,22 +65,25 @@ public class AdminOwnersController {
     private TextField fieldTelephone;
 
     @FXML
-    private TableColumn<?, ?> login;
+    private TableColumn<Owners, String> login;
 
     @FXML
-    private TableColumn<?, ?> name;
+    private TableColumn<Owners, String> name;
 
     @FXML
     private Button owners;
 
     @FXML
-    private TableView<?> tableadmins;
+    private TableView<Owners> tableadmins;
 
     @FXML
-    private TableColumn<?, ?> telephone;
+    private TableColumn<Owners, String> telephone;
+    DataBaseControl dbHandler = null;
+    Owners owner = new Owners();
 
     @FXML
-    void initialize() {
+    void initialize() throws SQLException, ClassNotFoundException {
+        fillTable();
         account();
         administrators();
         doctors();
@@ -101,6 +106,27 @@ public class AdminOwnersController {
             Window.changeWindow(event, "adminDoctors.fxml", "Ветеринарная клиника");
 
         });
+    }
+    private <T> void configureColumn(TableColumn<T, ?> column, String property) {
+        column.setCellValueFactory(new PropertyValueFactory<>(property));
+    }
+
+    private void addInfAboutTables() {
+        try {
+            owner.getObservableList().clear();
+            dbHandler = DataBaseControl.getInstance();
+            owner.getObservableList().addAll(dbHandler.getTableOwners());
+        } catch (ClassNotFoundException | SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    public void fillTable() throws SQLException, ClassNotFoundException {
+        addInfAboutTables();
+        configureColumn(name, "name");
+        configureColumn(address, "address");
+        configureColumn(telephone, "telephone");
+        configureColumn(login, "login");
+        tableadmins.setItems(owner.getObservableList());
     }
 
 }

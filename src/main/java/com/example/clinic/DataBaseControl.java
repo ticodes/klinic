@@ -95,11 +95,10 @@ public class DataBaseControl {
 
         return owners;
     }
-    public void newOwner(Owners owner){
+    public void newOwner(Owners owner) {
         String usernameCheck = "SELECT * FROM users WHERE login=?";
-        String insertClient = "INSERT INTO owners (name, address , telephone, id_user ) VALUES(?,?,?,?,?,?);";
-
-        String insertUser = "INSERT INTO users (login, password, role) VALUES(?, ?, " + "Клиент" + ");";
+        String insertClient = "INSERT INTO owners (name, address , telephone, id_user) VALUES(?,?,?,?);";
+        String insertUser = "INSERT INTO users (login, password, role) VALUES(?, ?, ?);";
 
         try {
             PreparedStatement usernameCheckSt = getDbConnection().prepareStatement(usernameCheck);
@@ -107,17 +106,20 @@ public class DataBaseControl {
 
             ResultSet usernameCheckRes = usernameCheckSt.executeQuery();
             if (usernameCheckRes.next()) {
-                // Логин уже существует, вернуть false или выполнить другие действия
+                throw new IllegalArgumentException("Логин уже существует"); // бросаем исключение если логин уже существует
             }
+
+            String hashedPassword = PasswordHasher.hashPassword(owner.getPassword());
 
             PreparedStatement prStUser = getDbConnection().prepareStatement(insertUser, Statement.RETURN_GENERATED_KEYS);
             prStUser.setString(1, owner.getLogin());
-            prStUser.setString(2, owner.getPassword()); // Сохранение хэша пароля
+            prStUser.setString(2, hashedPassword);
+            prStUser.setString(3, "Клиент");
 
             int resultUser = prStUser.executeUpdate();
 
             if (resultUser == 0) {
-                // Вставка пользователя не удалась, вернуть false или выполнить другие действия
+                throw new SQLException("Вставка пользователя не удалась"); // бросаем исключение если вставка пользователя не удалась
             }
 
             ResultSet generatedKeys = prStUser.getGeneratedKeys();
@@ -128,19 +130,68 @@ public class DataBaseControl {
                 prSt.setString(1, owner.getName());
                 prSt.setString(2, owner.getAddress());
                 prSt.setString(3, owner.getTelephone());
-                prSt.setString(4, owner.getLogin());
-                prSt.setString(5, owner.getPassword());
-                prSt.setInt(6, userId);
+                prSt.setInt(4, userId);
 
                 int resultClient = prSt.executeUpdate();
 
-                //return resultClient == 1; // Вернуть true, если запрос на вставку клиента выполнен успешно
+                if (resultClient == 0) {
+                    throw new SQLException("Вставка владельца не удалась"); // бросаем исключение если вставка владельца не удалась
+                }
             } else {
-                // Идентификатор пользователя не был сгенерирован, вернуть false или выполнить другие действия
-                //return false;
+                throw new SQLException("Идентификатор пользователя не был сгенерирован"); // бросаем исключение если идентификатор пользователя не был сгенерирован
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+    public List<Administrators> getTableAdmins() {
+        List<Administrators> admins = new ArrayList<>();
+        ResultSet resultSet = null;
+        String select = "SELECT * FROM users JOIN administrators ON users.id = administrators.id_user";
+
+        try {
+            PreparedStatement prSt = getInstance().getDbConnection().prepareStatement(select);
+
+            resultSet = prSt.executeQuery();
+            while (resultSet.next()) {
+                String lastName = resultSet.getString("last_name");
+                String firstName = resultSet.getString("first_name");
+                String secondName = resultSet.getString("second_name");
+                String login = resultSet.getString("login");
+                String password = resultSet.getString("password");
+                String role = resultSet.getString("role");
+                Administrators admin = new Administrators(lastName, firstName, secondName, login, password, role);
+                admins.add(admin);
+            }
+        } catch (SQLException | ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+
+        return admins;
+    }
+    public List<Owners> getTableOwners() {
+        List<Owners> owners = new ArrayList<>();
+        ResultSet resultSet = null;
+        String select = "SELECT * FROM users JOIN owners ON users.id = owners.id_user";
+
+        try {
+            PreparedStatement prSt = getInstance().getDbConnection().prepareStatement(select);
+
+            resultSet = prSt.executeQuery();
+            while (resultSet.next()) {
+                String name = resultSet.getString("name");
+                String address = resultSet.getString("address");
+                String telephone = resultSet.getString("telephone");
+                String login = resultSet.getString("login");
+                String password = resultSet.getString("password");
+                String role = resultSet.getString("role");
+                Owners owner = new Owners(name, address, telephone, login, password, role);
+                owners.add(owner);
+            }
+        } catch (SQLException | ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+
+        return owners;
     }
 }

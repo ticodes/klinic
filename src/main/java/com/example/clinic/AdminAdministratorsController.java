@@ -1,6 +1,7 @@
 package com.example.clinic;
 
 import java.net.URL;
+import java.sql.SQLException;
 import java.util.ResourceBundle;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -8,6 +9,7 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.cell.PropertyValueFactory;
 
 public class AdminAdministratorsController {
 
@@ -76,10 +78,13 @@ public class AdminAdministratorsController {
 
     @FXML
     private TableView<Administrators> tableadmins;
+    DataBaseControl dbHandler = null;
+    Administrators admins = new Administrators();
+
 
     @FXML
-    void initialize() {
-
+    void initialize() throws SQLException, ClassNotFoundException {
+        fillTable();
         account();
         doctors();
         owners();
@@ -101,6 +106,27 @@ public class AdminAdministratorsController {
             Window.changeWindow(event, "adminOwners.fxml", "Ветеринарная клиника");
 
         });
+    }
+    private <T> void configureColumn(TableColumn<T, ?> column, String property) {
+        column.setCellValueFactory(new PropertyValueFactory<>(property));
+    }
+
+    private void addInfAboutTables() {
+        try {
+            admins.getAdmins().clear();
+            dbHandler = DataBaseControl.getInstance();
+            admins.getAdmins().addAll(dbHandler.getTableAdmins());
+        } catch (ClassNotFoundException | SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    public void fillTable() throws SQLException, ClassNotFoundException {
+        addInfAboutTables();
+        configureColumn(firstName, "firstName");
+        configureColumn(lastName, "lastName");
+        configureColumn(secondName, "secondName");
+        configureColumn(login, "login");
+        tableadmins.setItems(admins.getAdmins());
     }
 
 }

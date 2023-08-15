@@ -42,6 +42,9 @@ public class Owners extends User{
         this.address = address;
         this.telephone = telephone;
     }
+    public Owners(){
+
+    }
 
     public ObservableList<Owners> getObservableList() throws SQLException, ClassNotFoundException {
         ownersObesrvableList = FXCollections.observableArrayList(DataBaseControl.getInstance().getOwners());

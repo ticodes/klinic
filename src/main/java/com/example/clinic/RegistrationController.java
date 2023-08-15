@@ -38,9 +38,18 @@ public class RegistrationController {
     DataBaseControl dbHandler = null;
 
     @FXML
-    void initialize() throws SQLException, ClassNotFoundException {
+    void initialize() {
         exit();
-        newOwners();;
+        Registration.setOnAction(event -> {
+            try {
+                newOwners();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+
+        });
 
     }
     public void exit(){
