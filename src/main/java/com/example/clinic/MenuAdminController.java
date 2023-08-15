@@ -68,6 +68,7 @@ public class MenuAdminController {
         administrators();
         doctors();
         owners();
+        appointments();
 
     }
     public void exit(){
@@ -97,6 +98,12 @@ public class MenuAdminController {
     public void owners(){
         owners.setOnAction(event -> {
             Window.changeWindow(event, "adminOwners.fxml", "Ветеринарная клиника");
+
+        });
+    }
+    public void appointments(){
+        appointments.setOnAction(event -> {
+            Window.changeWindow(event, "adminAppointments.fxml", "Ветеринарная клиника");
 
         });
     }

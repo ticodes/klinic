@@ -2,8 +2,9 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
@@ -45,7 +46,7 @@
             </Button>
             <Button fx:id="appointments" mnemonicParsing="false" style="-fx-background-color: #DCC7AA;" text="Приёмы">
                 <font>
-                    <Font size="13.0" />
+                    <Font name="System Bold" size="13.0" />
                 </font>
                 <HBox.margin>
                     <Insets right="20.0" />
@@ -53,7 +54,7 @@
             </Button>
             <Button fx:id="owners" mnemonicParsing="false" style="-fx-background-color: #DCC7AA;" text="Владельцы">
                 <font>
-                    <Font name="System Bold" size="13.0" />
+                    <Font size="13.0" />
                 </font>
                 <HBox.margin>
                     <Insets right="20.0" />
@@ -76,27 +77,27 @@
     </HBox>
     <AnchorPane prefHeight="562.0" prefWidth="892.0">
         <children>
-            <TableView fx:id="tableadmins" layoutX="264.0" layoutY="-2.0" prefHeight="562.0" prefWidth="628.0">
+            <TableView fx:id="tableappointment" layoutX="264.0" layoutY="-2.0" prefHeight="562.0" prefWidth="628.0">
                 <columns>
-                    <TableColumn fx:id="name" prefWidth="149.5999755859375" text="Имя" />
-                    <TableColumn fx:id="address" prefWidth="126.4000244140625" text="Адрес" />
-                    <TableColumn fx:id="telephone" prefWidth="192.0" text="Телефон" />
-                    <TableColumn fx:id="login" prefWidth="154.4000244140625" text="Логин" />
+                    <TableColumn fx:id="datetime" prefWidth="125.60003662109375" text="Дата и время" />
+                    <TableColumn fx:id="doctor" prefWidth="184.0" text="Доктор" />
+                    <TableColumn fx:id="owner" prefWidth="159.99993896484375" text="Владелец" />
+                    <TableColumn fx:id="animal" prefWidth="154.4000244140625" text="Животное" />
                 </columns>
             </TableView>
-            <TextField fx:id="fieldName" layoutX="14.0" layoutY="88.0" prefHeight="27.0" prefWidth="230.0" />
-            <TextField fx:id="fieldAddress" layoutX="14.0" layoutY="158.0" prefHeight="27.0" prefWidth="230.0" />
-            <TextField fx:id="fieldTelephone" layoutX="14.0" layoutY="228.0" prefHeight="27.0" prefWidth="230.0" />
-            <TextField fx:id="fieldLogin" layoutX="14.0" layoutY="298.0" prefHeight="27.0" prefWidth="230.0" />
+            <TextField fx:id="fieldtime" layoutX="14.0" layoutY="158.0" prefHeight="27.0" prefWidth="230.0" />
             <Button fx:id="add" layoutX="70.0" layoutY="429.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="118.0" text="Добавить" />
             <Button fx:id="change" layoutX="70.0" layoutY="473.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="118.0" text="Изменить" />
             <Button fx:id="delete" layoutX="70.0" layoutY="513.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="118.0" text="Удалить" />
-            <PasswordField fx:id="fieldPassword" layoutX="14.0" layoutY="368.0" prefHeight="27.0" prefWidth="230.0" />
-            <Label layoutX="17.0" layoutY="70.0" text="Имя" />
-            <Label layoutX="17.0" layoutY="140.0" text="Адрес" />
-            <Label layoutX="17.0" layoutY="210.0" text="Телефон" />
-            <Label layoutX="17.0" layoutY="280.0" text="Логин" />
-            <Label layoutX="17.0" layoutY="350.0" text="Пароль" />
+            <Label layoutX="17.0" layoutY="70.0" text="Дата" />
+            <Label layoutX="17.0" layoutY="140.0" text="Время" />
+            <Label layoutX="17.0" layoutY="210.0" text="Доктор" />
+            <Label layoutX="17.0" layoutY="280.0" text="Владелец" />
+            <Label layoutX="17.0" layoutY="350.0" text="Животное" />
+         <DatePicker fx:id="fielddate" layoutX="14.0" layoutY="88.0" prefHeight="27.0" prefWidth="230.0" />
+         <ChoiceBox fx:id="fieldDoctor" layoutX="17.0" layoutY="228.0" prefHeight="27.0" prefWidth="230.0" />
+         <ChoiceBox fx:id="fieldOwner" layoutX="14.0" layoutY="298.0" prefHeight="27.0" prefWidth="230.0" />
+         <ChoiceBox fx:id="fieldAnimal" layoutX="17.0" layoutY="368.0" prefHeight="27.0" prefWidth="230.0" />
         </children>
     </AnchorPane>
 

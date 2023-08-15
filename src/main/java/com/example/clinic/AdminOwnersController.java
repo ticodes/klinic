@@ -87,6 +87,7 @@ public class AdminOwnersController {
         account();
         administrators();
         doctors();
+        appointments();
 
     }
     public void account(){
@@ -104,6 +105,12 @@ public class AdminOwnersController {
     public void doctors(){
         doctors.setOnAction(event -> {
             Window.changeWindow(event, "adminDoctors.fxml", "Ветеринарная клиника");
+
+        });
+    }
+    public void appointments(){
+        appointments.setOnAction(event -> {
+            Window.changeWindow(event, "adminAppointments.fxml", "Ветеринарная клиника");
 
         });
     }

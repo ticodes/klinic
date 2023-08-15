@@ -195,4 +195,28 @@ public class DataBaseControl {
 
         return doctors;
     }
+    public List<Appointments> getTableAppointments() {
+        List<Appointments> appointments = new ArrayList<>();
+        ResultSet resultSet = null;
+        String select = "SELECT * FROM appointments JOIN doctors ON doctors.id = appointments.id_doctor JOIN owners ON owners.id = " +
+                "appointments.id_owner JOIN animals ON animals.id = appointments.id_animal JOIN breeds ON breeds.id = animals.id_breed";
+
+        try {
+            PreparedStatement prSt = getInstance().getDbConnection().prepareStatement(select);
+
+            resultSet = prSt.executeQuery();
+            while (resultSet.next()) {
+                String datetime = resultSet.getString("date") + " " + resultSet.getString("time");
+                String doctor = resultSet.getString("doctors.name") + " " + resultSet.getString("telephone");
+                String owner = resultSet.getString("owners.name") + " " + resultSet.getString("telephone");
+                String animal = resultSet.getString("animals.name") + " - " + resultSet.getString("breeds.name");
+                Appointments appointment = new Appointments(datetime, doctor, owner, animal);
+                appointments.add(appointment);
+            }
+        } catch (SQLException | ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+
+        return appointments;
+    }
 }
