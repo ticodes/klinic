@@ -71,30 +71,6 @@ public class DataBaseControl {
 
         return admins;
     }
-    public List<Owners> getOwners() {
-        List<Owners> owners = new ArrayList<>();
-        ResultSet resultSet = null;
-        String select = "SELECT * FROM users JOIN owners ON users.id = owners.id_user";
-
-        try {
-            PreparedStatement prSt = getInstance().getDbConnection().prepareStatement(select);
-            resultSet = prSt.executeQuery();
-            while (resultSet.next()) {
-                String name = resultSet.getString("name");
-                String address = resultSet.getString("address");
-                String telephone = resultSet.getString("telephone");
-                String login = resultSet.getString("login");
-                String password = resultSet.getString("password");
-
-                Owners owner = new Owners(name, address, telephone, login, password, "Клиент");
-                owners.add(owner);
-            }
-        } catch (SQLException | ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-
-        return owners;
-    }
     public void newOwner(Owners owner) {
         String usernameCheck = "SELECT * FROM users WHERE login=?";
         String insertClient = "INSERT INTO owners (name, address , telephone, id_user) VALUES(?,?,?,?);";
@@ -193,5 +169,30 @@ public class DataBaseControl {
         }
 
         return owners;
+    }
+    public List<Doctors> getTableDoctors() {
+        List<Doctors> doctors = new ArrayList<>();
+        ResultSet resultSet = null;
+        String select = "SELECT * FROM users JOIN doctors ON users.id = doctors.id_user";
+
+        try {
+            PreparedStatement prSt = getInstance().getDbConnection().prepareStatement(select);
+
+            resultSet = prSt.executeQuery();
+            while (resultSet.next()) {
+                String name = resultSet.getString("name");
+                String address = resultSet.getString("address");
+                String telephone = resultSet.getString("telephone");
+                String login = resultSet.getString("login");
+                String password = resultSet.getString("password");
+                String role = resultSet.getString("role");
+                Doctors doctor = new Doctors(name, address, telephone, login, password, role);
+                doctors.add(doctor);
+            }
+        } catch (SQLException | ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+
+        return doctors;
     }
 }
