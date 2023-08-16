@@ -66,6 +66,21 @@ public class AdminBreedsController {
     void initialize() throws SQLException, ClassNotFoundException {
         fillTable();
         getDataField();
+
+        add.setOnAction(event -> {
+            if(!fieldName.getText().isEmpty()) {
+                try {
+                    breed.addBreed(new Breeds(fieldName.getText()));
+                    initialize();
+                    fieldName.clear();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                } catch (ClassNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+
         administrators();
         doctors();
         owners();

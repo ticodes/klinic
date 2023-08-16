@@ -14,6 +14,9 @@ public class Breeds {
         this.id = id;
         this.name = name;
     }
+    public Breeds(String name) {
+        this.name = name;
+    }
     public Breeds(){
 
     }
@@ -36,5 +39,8 @@ public class Breeds {
 
     public void setName(String name) {
         this.name = name;
+    }
+    public void addBreed(Breeds breed) throws SQLException, ClassNotFoundException {
+        DataBaseControl.getInstance().newBreed(breed);
     }
 }

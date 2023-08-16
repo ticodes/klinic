@@ -19,6 +19,12 @@ public class Administrators extends User{
         this.firstName = firstName;
         this.secondName = secondName;
     }
+    public Administrators(String firstName, String lastName, String secondName, String login, String password) {
+        super(login, password);
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.secondName = secondName;
+    }
     public ObservableList<Administrators> getObservableList() throws SQLException, ClassNotFoundException {
         adminObesrvableList = FXCollections.observableArrayList(DataBaseControl.getInstance().getAdmins());
         return adminObesrvableList;
@@ -54,5 +60,8 @@ public class Administrators extends User{
     public ObservableList<Administrators> getAdmins() throws SQLException, ClassNotFoundException {
         adminObesrvableList = FXCollections.observableArrayList(DataBaseControl.getInstance().getTableAdmins());
         return adminObesrvableList;
+    }
+    public void addAdministrator(Administrators administrator) throws SQLException, ClassNotFoundException {
+        DataBaseControl.getInstance().newAdministrator(administrator);
     }
 }

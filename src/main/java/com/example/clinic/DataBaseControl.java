@@ -388,5 +388,91 @@ public class DataBaseControl {
             throw new RuntimeException(e);
         }
     }
+    public void newAdministrator(Administrators admin) {
+        String usernameCheck = "SELECT * FROM users WHERE login=?";
+        String insertClient = "INSERT INTO administrators (last_name, first_name, second_name, id_user) VALUES(?,?,?,?);";
+        String insertUser = "INSERT INTO users (login, password, role) VALUES(?, ?, ?);";
+
+        try {
+            if (admin.getLogin().isEmpty() || admin.getPassword().isEmpty() || admin.getFirstName().isEmpty() ||
+                    admin.getSecondName().isEmpty() || admin.getLastName().isEmpty()) {
+                System.out.println("Не все поля заполнены.");
+                return;
+            }
+
+            PreparedStatement usernameCheckSt = getDbConnection().prepareStatement(usernameCheck);
+            usernameCheckSt.setString(1, admin.getLogin());
+            ResultSet usernameCheckRes = usernameCheckSt.executeQuery();
+            if (usernameCheckRes.next()) {
+                System.out.println("Логин уже существует.");
+                return;
+            }
+
+            String hashedPassword = PasswordHasher.hashPassword(admin.getPassword());
+
+            PreparedStatement prStUser = getDbConnection().prepareStatement(insertUser, Statement.RETURN_GENERATED_KEYS);
+            prStUser.setString(1, admin.getLogin());
+            prStUser.setString(2, hashedPassword);
+            prStUser.setString(3, "Администратор");
+            int resultUser = prStUser.executeUpdate();
+            if (resultUser == 0) {
+                System.out.println("Вставка пользователя не удалась.");
+                return;
+            }
+
+            ResultSet generatedKeys = prStUser.getGeneratedKeys();
+            if (generatedKeys.next()) {
+                int userId = generatedKeys.getInt(1);
+
+                PreparedStatement prSt = getDbConnection().prepareStatement(insertClient);
+                prSt.setString(1, admin.getLastName());
+                prSt.setString(2, admin.getFirstName());
+                prSt.setString(3, admin.getSecondName());
+                prSt.setInt(4, userId);
+                int resultClient = prSt.executeUpdate();
+
+                if (resultClient == 0) {
+                    System.out.println("Вставка администратора не удалась.");
+                } else {
+                    System.out.println("Новый администратор успешно добавлен.");
+                }
+            } else {
+                System.out.println("Идентификатор пользователя не был сгенерирован.");
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    public void newBreed(Breeds breed) {
+        String usernameCheck = "SELECT * FROM breeds WHERE name =?";
+        String insertBreed = "INSERT INTO breeds (name) VALUES(?);";
+
+        try {
+            if (breed.getName().isEmpty()) {
+                System.out.println("Не все поля заполнены.");
+                return;
+            }
+
+            PreparedStatement usernameCheckSt = getDbConnection().prepareStatement(usernameCheck);
+            usernameCheckSt.setString(1, breed.getName());
+            ResultSet usernameCheckRes = usernameCheckSt.executeQuery();
+            if (usernameCheckRes.next()) {
+                System.out.println("Порода уже существует.");
+                return;
+            }
+
+            PreparedStatement prSt = getDbConnection().prepareStatement(insertBreed);
+            prSt.setString(1, breed.getName());
+            int result = prSt.executeUpdate();
+
+            if (result == 0) {
+                System.out.println("Не удалось добавить породу.");
+            } else {
+                System.out.println("Новая порода успешно добавлена.");
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
 }
