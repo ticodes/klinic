@@ -41,6 +41,12 @@ public class Doctors extends User{
         this.address = address;
         this.telephone = telephone;
     }
+    public Doctors(String name, String address, String telephone, String login, String password) {
+        super(login, password);
+        this.name = name;
+        this.address = address;
+        this.telephone = telephone;
+    }
     public Doctors(){
 
     }
@@ -48,5 +54,8 @@ public class Doctors extends User{
     public ObservableList<Doctors> getObservableList() throws SQLException, ClassNotFoundException {
         doctorsObesrvableList = FXCollections.observableArrayList(DataBaseControl.getInstance().getTableDoctors());
         return doctorsObesrvableList;
+    }
+    public void addDoctor(Doctors doctor) throws SQLException, ClassNotFoundException {
+        DataBaseControl.getInstance().newDoctor(doctor);
     }
 }

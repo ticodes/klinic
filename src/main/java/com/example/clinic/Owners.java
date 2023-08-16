@@ -42,6 +42,12 @@ public class Owners extends User{
         this.address = address;
         this.telephone = telephone;
     }
+    public Owners(String name, String address, String telephone, String login, String password) {
+        super(login, password);
+        this.name = name;
+        this.address = address;
+        this.telephone = telephone;
+    }
     public Owners(){
 
     }
@@ -49,5 +55,8 @@ public class Owners extends User{
     public ObservableList<Owners> getObservableList() throws SQLException, ClassNotFoundException {
         ownersObesrvableList = FXCollections.observableArrayList(DataBaseControl.getInstance().getTableOwners());
         return ownersObesrvableList;
+    }
+    public void addOwner(Owners owner) throws SQLException, ClassNotFoundException {
+        DataBaseControl.getInstance().newOwner(owner);
     }
 }

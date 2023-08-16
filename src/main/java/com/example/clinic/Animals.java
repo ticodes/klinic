@@ -23,6 +23,9 @@ public class Animals {
         animalsObesrvableList = FXCollections.observableArrayList(DataBaseControl.getInstance().getTableAnimals());
         return animalsObesrvableList;
     }
+    public void addAnimal(Animals animal) throws SQLException, ClassNotFoundException {
+        DataBaseControl.getInstance().addAnimal(animal);
+    }
 
     public String getName() {
         return name;

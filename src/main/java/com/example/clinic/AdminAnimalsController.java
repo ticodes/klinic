@@ -83,6 +83,21 @@ public class AdminAnimalsController {
         getDataField();
         fillChoiseBreed();
         fillChoiseOwner();
+
+        add.setOnAction(event -> {
+            if(!fieldName.getText().isEmpty() && !fieldBreed.getValue().isEmpty() && !fieldOwner.getValue().isEmpty()) {
+                try {
+                    animal.addAnimal(new Animals(fieldName.getText(), fieldBreed.getValue(), fieldOwner.getValue()));
+                    initialize();
+                    fieldName.clear();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                } catch (ClassNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+
         administrators();
         doctors();
         owners();

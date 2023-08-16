@@ -77,12 +77,18 @@ public class DataBaseControl {
         String insertUser = "INSERT INTO users (login, password, role) VALUES(?, ?, ?);";
 
         try {
+            if (owner.getLogin().isEmpty() || owner.getPassword().isEmpty() || owner.getName().isEmpty() ||
+                    owner.getAddress().isEmpty() || owner.getTelephone().isEmpty()) {
+                System.out.println("Не все поля заполнены.");
+                return;
+            }
+
             PreparedStatement usernameCheckSt = getDbConnection().prepareStatement(usernameCheck);
             usernameCheckSt.setString(1, owner.getLogin());
-
             ResultSet usernameCheckRes = usernameCheckSt.executeQuery();
             if (usernameCheckRes.next()) {
-                throw new IllegalArgumentException("Логин уже существует"); // бросаем исключение если логин уже существует
+                System.out.println("Логин уже существует.");
+                return;
             }
 
             String hashedPassword = PasswordHasher.hashPassword(owner.getPassword());
@@ -91,11 +97,10 @@ public class DataBaseControl {
             prStUser.setString(1, owner.getLogin());
             prStUser.setString(2, hashedPassword);
             prStUser.setString(3, "Клиент");
-
             int resultUser = prStUser.executeUpdate();
-
             if (resultUser == 0) {
-                throw new SQLException("Вставка пользователя не удалась"); // бросаем исключение если вставка пользователя не удалась
+                System.out.println("Вставка пользователя не удалась.");
+                return;
             }
 
             ResultSet generatedKeys = prStUser.getGeneratedKeys();
@@ -107,14 +112,15 @@ public class DataBaseControl {
                 prSt.setString(2, owner.getAddress());
                 prSt.setString(3, owner.getTelephone());
                 prSt.setInt(4, userId);
-
                 int resultClient = prSt.executeUpdate();
 
                 if (resultClient == 0) {
-                    throw new SQLException("Вставка владельца не удалась"); // бросаем исключение если вставка владельца не удалась
+                    System.out.println("Вставка владельца не удалась.");
+                } else {
+                    System.out.println("Новый владелец успешно добавлен.");
                 }
             } else {
-                throw new SQLException("Идентификатор пользователя не был сгенерирован"); // бросаем исключение если идентификатор пользователя не был сгенерирован
+                System.out.println("Идентификатор пользователя не был сгенерирован.");
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -245,7 +251,7 @@ public class DataBaseControl {
     public List<Animals> getTableAnimals() {
         List<Animals> animals = new ArrayList<>();
         ResultSet resultSet = null;
-        String select = "SELECT * FROM animals JOIN breeds ON animals.id_breed = breeds.id JOIN owners ON owners.id_animal = animals.id";
+        String select = "SELECT * FROM animals JOIN breeds ON animals.id_breed = breeds.id JOIN owners ON owners.id = animals.id_owner";
 
         try {
             PreparedStatement prSt = getInstance().getDbConnection().prepareStatement(select);
@@ -263,6 +269,124 @@ public class DataBaseControl {
         }
 
         return animals;
+    }
+    public void addAnimal(Animals animal) {
+        try {
+            // Получаем id породы по ее названию
+            String selectBreedId = "SELECT id FROM breeds WHERE name = ?";
+            PreparedStatement breedIdStatement = getInstance().getDbConnection().prepareStatement(selectBreedId);
+            breedIdStatement.setString(1, animal.getBreed());
+            ResultSet breedIdResultSet = breedIdStatement.executeQuery();
+            int breedId = 0;
+            if (breedIdResultSet.next()) {
+                breedId = breedIdResultSet.getInt("id");
+            } else {
+                throw new IllegalArgumentException("Порода с названием " + animal.getBreed() + " не существует.");
+            }
+
+            // Получаем id хозяина по его имени и телефону
+            String selectOwnerId = "SELECT id FROM owners WHERE name = ? AND telephone = ?";
+            PreparedStatement ownerIdStatement = getInstance().getDbConnection().prepareStatement(selectOwnerId);
+            ownerIdStatement.setString(1, animal.getOwner().split(", ")[0]); // Имя хозяина
+            ownerIdStatement.setString(2, animal.getOwner().split(", ")[1]); // Телефон хозяина
+            ResultSet ownerIdResultSet = ownerIdStatement.executeQuery();
+            int ownerId = 0;
+            if (ownerIdResultSet.next()) {
+                ownerId = ownerIdResultSet.getInt("id");
+            } else {
+                throw new IllegalArgumentException("Хозяин с именем и телефоном " + animal.getOwner() + " не найден.");
+            }
+
+            // Проверяем, нет ли уже точно такой же записи в таблице animals
+            String checkAnimalExists = "SELECT id FROM animals WHERE id_breed = ? AND id_owner = ? AND name = ?";
+            PreparedStatement checkAnimalExistsStatement = getInstance().getDbConnection().prepareStatement(checkAnimalExists);
+            checkAnimalExistsStatement.setInt(1, breedId);
+            checkAnimalExistsStatement.setInt(2, ownerId);
+            checkAnimalExistsStatement.setString(3, animal.getName());
+            ResultSet animalExistsResultSet = checkAnimalExistsStatement.executeQuery();
+            if (animalExistsResultSet.next()) {
+                System.out.println("Животное уже существует.");
+                return;
+            }
+
+            // Добавляем животное в таблицу animals
+            String insertAnimal = "INSERT INTO animals (id_breed, id_owner, name) VALUES (?, ?, ?)";
+            PreparedStatement insertAnimalStatement = getInstance().getDbConnection().prepareStatement(insertAnimal, Statement.RETURN_GENERATED_KEYS);
+            insertAnimalStatement.setInt(1, breedId);
+            insertAnimalStatement.setInt(2, ownerId);
+            insertAnimalStatement.setString(3, animal.getName());
+            int rowsAffected = insertAnimalStatement.executeUpdate();
+            if (rowsAffected == 1) {
+                ResultSet generatedKeys = insertAnimalStatement.getGeneratedKeys();
+                int animalId;
+                if (generatedKeys.next()) {
+                    animalId = generatedKeys.getInt(1);
+                } else {
+                    throw new SQLException("Не удалось получить сгенерированный id для нового животного.");
+                }
+
+                System.out.println("Животное успешно добавлено с id: " + animalId);
+            } else {
+                throw new SQLException("Не удалось добавить животное.");
+            }
+        } catch (SQLException | ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    public void newDoctor(Doctors doctor) {
+        String usernameCheck = "SELECT * FROM users WHERE login=?";
+        String insertClient = "INSERT INTO doctors (name, address , telephone, id_user) VALUES(?,?,?,?);";
+        String insertUser = "INSERT INTO users (login, password, role) VALUES(?, ?, ?);";
+
+        try {
+            if (doctor.getLogin().isEmpty() || doctor.getPassword().isEmpty() || doctor.getName().isEmpty() ||
+                    doctor.getAddress().isEmpty() || doctor.getTelephone().isEmpty()) {
+                System.out.println("Не все поля заполнены.");
+                return;
+            }
+
+            PreparedStatement usernameCheckSt = getDbConnection().prepareStatement(usernameCheck);
+            usernameCheckSt.setString(1, doctor.getLogin());
+            ResultSet usernameCheckRes = usernameCheckSt.executeQuery();
+            if (usernameCheckRes.next()) {
+                System.out.println("Логин уже существует.");
+                return;
+            }
+
+            String hashedPassword = PasswordHasher.hashPassword(doctor.getPassword());
+
+            PreparedStatement prStUser = getDbConnection().prepareStatement(insertUser, Statement.RETURN_GENERATED_KEYS);
+            prStUser.setString(1, doctor.getLogin());
+            prStUser.setString(2, hashedPassword);
+            prStUser.setString(3, "Врач");
+            int resultUser = prStUser.executeUpdate();
+            if (resultUser == 0) {
+                System.out.println("Вставка пользователя не удалась.");
+                return;
+            }
+
+            ResultSet generatedKeys = prStUser.getGeneratedKeys();
+            if (generatedKeys.next()) {
+                int userId = generatedKeys.getInt(1);
+
+                PreparedStatement prSt = getDbConnection().prepareStatement(insertClient);
+                prSt.setString(1, doctor.getName());
+                prSt.setString(2, doctor.getAddress());
+                prSt.setString(3, doctor.getTelephone());
+                prSt.setInt(4, userId);
+                int resultClient = prSt.executeUpdate();
+
+                if (resultClient == 0) {
+                    System.out.println("Вставка врача не удалась.");
+                } else {
+                    System.out.println("Новый врач успешно добавлен.");
+                }
+            } else {
+                System.out.println("Идентификатор пользователя не был сгенерирован.");
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

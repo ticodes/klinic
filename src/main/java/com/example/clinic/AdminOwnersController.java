@@ -85,6 +85,25 @@ public class AdminOwnersController {
     void initialize() throws SQLException, ClassNotFoundException {
         fillTable();
         getDataField();
+
+        add.setOnAction(event -> {
+            if(!fieldName.getText().isEmpty() && !fieldAddress.getText().isEmpty() && !fieldTelephone.getText().isEmpty() && !fieldLogin.getText().isEmpty() && !fieldPassword.getText().isEmpty()) {
+                try {
+                    owner.addOwner(new Owners(fieldName.getText(), fieldAddress.getText(), fieldTelephone.getText(), fieldLogin.getText(), fieldPassword.getText()));
+                    initialize();
+                    fieldName.clear();
+                    fieldAddress.clear();
+                    fieldTelephone.clear();
+                    fieldLogin.clear();
+                    fieldPassword.clear();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                } catch (ClassNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+
         account();
         administrators();
         doctors();

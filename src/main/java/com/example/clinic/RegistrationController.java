@@ -43,6 +43,11 @@ public class RegistrationController {
         Registration.setOnAction(event -> {
             try {
                 newOwners();
+                nameField.clear();
+                addressField.clear();
+                telephoneField.clear();
+                loginField.clear();
+                passwordField.clear();
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             } catch (ClassNotFoundException e) {
@@ -68,6 +73,7 @@ public class RegistrationController {
         dbHandler = DataBaseControl.getInstance();
         Owners owner = new Owners(name, address, telephone, login, password, "Клиент");
         dbHandler.newOwner(owner);
+
     }
 
 }
