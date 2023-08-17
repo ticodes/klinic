@@ -44,10 +44,6 @@ public class AdminAnimalsController {
 
     @FXML
     private Button breeds;
-
-    @FXML
-    private Button change;
-
     @FXML
     private Button delete;
 
@@ -88,6 +84,19 @@ public class AdminAnimalsController {
             if(!fieldName.getText().isEmpty() && !fieldBreed.getValue().isEmpty() && !fieldOwner.getValue().isEmpty()) {
                 try {
                     animal.addAnimal(new Animals(fieldName.getText(), fieldBreed.getValue(), fieldOwner.getValue()));
+                    initialize();
+                    fieldName.clear();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                } catch (ClassNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+        delete.setOnAction(event -> {
+            if(!fieldName.getText().isEmpty() && !fieldBreed.getValue().isEmpty() && !fieldOwner.getValue().isEmpty()) {
+                try {
+                    animal.deleteAnimal(new Animals(fieldName.getText(), fieldBreed.getValue(), fieldOwner.getValue()));
                     initialize();
                     fieldName.clear();
                 } catch (SQLException e) {

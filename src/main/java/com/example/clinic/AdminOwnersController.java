@@ -39,10 +39,6 @@ public class AdminOwnersController {
 
     @FXML
     private Button breeds;
-
-    @FXML
-    private Button change;
-
     @FXML
     private Button delete;
 

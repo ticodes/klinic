@@ -53,6 +53,11 @@ public class Appointments {
     public Appointments(){
 
     }
+    public Appointments(String date, String time , String doctor) {
+        this.date = date;
+        this.time = time;
+        this.doctor = doctor;
+    }
 
     private String animal;
     public ObservableList<Appointments> getObservableList() throws SQLException, ClassNotFoundException {
@@ -101,5 +106,8 @@ public class Appointments {
     }
     public void addAppointment(Appointments appointment) throws SQLException, ClassNotFoundException {
         DataBaseControl.getInstance().newAppointment(appointment);
+    }
+    public void deleteAppointment(Appointments appointment) throws SQLException, ClassNotFoundException {
+        DataBaseControl.getInstance().deleteAppointment(appointment);
     }
 }

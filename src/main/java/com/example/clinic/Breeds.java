@@ -43,4 +43,7 @@ public class Breeds {
     public void addBreed(Breeds breed) throws SQLException, ClassNotFoundException {
         DataBaseControl.getInstance().newBreed(breed);
     }
+    public void deleteBreed(Breeds breed) throws SQLException, ClassNotFoundException {
+        DataBaseControl.getInstance().deleteBreed(breed);
+    }
 }

@@ -46,10 +46,6 @@ public class AdminAppointmentsController {
 
     @FXML
     private Button breeds;
-
-    @FXML
-    private Button change;
-
     @FXML
     private TableColumn<Appointments, String> datetime;
 
@@ -95,7 +91,22 @@ public class AdminAppointmentsController {
                 try {
                     appoint.addAppointment(new Appointments( String.valueOf(fielddate.getValue()), fieldtime.getText(), fieldDoctor.getValue(), fieldAnimal.getValue(), fieldAnimal.getValue()));
                     initialize();
+                    fieldtime.clear();
                     fielddate.setValue(null);
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                } catch (ClassNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+        delete.setOnAction(event -> {
+            if(!fieldtime.getText().isEmpty() && !fielddate.getValue().equals(null) && !fieldDoctor.getValue().isEmpty()) {
+                try {
+                    appoint.deleteAppointment(new Appointments( String.valueOf(fielddate.getValue()), fieldtime.getText(), fieldDoctor.getValue()));
+                    initialize();
+                    fielddate.setValue(null);
+                    fieldtime.clear();
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
                 } catch (ClassNotFoundException e) {

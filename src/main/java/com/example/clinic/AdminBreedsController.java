@@ -35,10 +35,6 @@ public class AdminBreedsController {
 
     @FXML
     private Button breeds;
-
-    @FXML
-    private Button change;
-
     @FXML
     private Button delete;
 
@@ -71,6 +67,19 @@ public class AdminBreedsController {
             if(!fieldName.getText().isEmpty()) {
                 try {
                     breed.addBreed(new Breeds(fieldName.getText()));
+                    initialize();
+                    fieldName.clear();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                } catch (ClassNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+        delete.setOnAction(event -> {
+            if(!fieldName.getText().isEmpty()) {
+                try {
+                    breed.deleteBreed(new Breeds(fieldName.getText()));
                     initialize();
                     fieldName.clear();
                 } catch (SQLException e) {

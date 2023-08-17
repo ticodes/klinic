@@ -85,8 +85,7 @@
             </TableView>
             <TextField fx:id="fieldName" layoutX="14.0" layoutY="88.0" prefHeight="27.0" prefWidth="230.0" />
             <Button fx:id="add" layoutX="73.0" layoutY="298.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="118.0" text="Добавить" />
-            <Button fx:id="change" layoutX="73.0" layoutY="342.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="118.0" text="Изменить" />
-            <Button fx:id="delete" layoutX="73.0" layoutY="382.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="118.0" text="Удалить" />
+            <Button fx:id="delete" layoutX="73.0" layoutY="340.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="118.0" text="Удалить" />
             <Label layoutX="17.0" layoutY="70.0" text="Имя" />
             <Label layoutX="17.0" layoutY="140.0" text="Порода" />
             <Label layoutX="17.0" layoutY="210.0" text="Владелец" />

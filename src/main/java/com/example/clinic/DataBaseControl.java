@@ -627,4 +627,136 @@ public class DataBaseControl {
 
         return 0;
     }
+    public void deleteBreed(Breeds breed) {
+        String idCheck = "SELECT id FROM breeds WHERE name = ?";
+        String deleteBreed = "DELETE FROM breeds WHERE id = ?";
+
+        try {
+            if (breed.getName().isEmpty()) {
+                System.out.println("Не все поля заполнены.");
+                return;
+            }
+
+            PreparedStatement idCheckStatement = getDbConnection().prepareStatement(idCheck);
+            idCheckStatement.setString(1, breed.getName());
+            ResultSet idCheckResultSet = idCheckStatement.executeQuery();
+            if (!idCheckResultSet.next()) {
+                System.out.println("Порода не найдена.");
+                return;
+            }
+            int breedId = idCheckResultSet.getInt("id");
+
+            PreparedStatement deleteBreedStatement = getDbConnection().prepareStatement(deleteBreed);
+            deleteBreedStatement.setInt(1, breedId);
+            int result = deleteBreedStatement.executeUpdate();
+
+            if (result == 0) {
+                System.out.println("Не удалось удалить породу.");
+            } else {
+                System.out.println("Порода успешно удалена.");
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    public void deleteAnimal(Animals animal) {
+        String idOwner = "SELECT id FROM owners WHERE name = ? AND telephone = ?";
+        String idBreed = "SELECT id FROM breeds WHERE name = ?";
+        String idCheck = "SELECT id FROM animals WHERE name = ? AND id_owner = ? AND id_breed = ?";
+        String deleteAnimal = "DELETE FROM animals WHERE id = ?";
+
+        try {
+            if (animal.getName().isEmpty() || animal.getOwner().isEmpty() || animal.getBreed().isEmpty()) {
+                System.out.println("Не все поля заполнены.");
+                return;
+            }
+
+            PreparedStatement idCheckOwner = getDbConnection().prepareStatement(idOwner);
+            idCheckOwner.setString(1, animal.getOwner().split(", ")[0]);
+            idCheckOwner.setString(2, animal.getOwner().split(", ")[1]);
+            ResultSet idOwnerResultSet = idCheckOwner.executeQuery();
+            if (!idOwnerResultSet.next()) {
+                System.out.println("Владелец не найден.");
+                return;
+            }
+            int ownerId = idOwnerResultSet.getInt("id");
+
+            PreparedStatement idCheckBreed = getDbConnection().prepareStatement(idBreed);
+            idCheckBreed.setString(1, animal.getBreed());
+            ResultSet idBreedResultSet = idCheckBreed.executeQuery();
+            if (!idBreedResultSet.next()) {
+                System.out.println("Порода не найдена.");
+                return;
+            }
+            int breedId = idBreedResultSet.getInt("id");
+
+            PreparedStatement idCheckStatement = getDbConnection().prepareStatement(idCheck);
+            idCheckStatement.setString(1, animal.getName());
+            idCheckStatement.setInt(2, ownerId);
+            idCheckStatement.setInt(3, breedId);
+            ResultSet idCheckResultSet = idCheckStatement.executeQuery();
+            if (!idCheckResultSet.next()) {
+                System.out.println("Животное не найдено.");
+                return;
+            }
+            int animalId = idCheckResultSet.getInt("id");
+
+            PreparedStatement deleteAnimalStatement = getDbConnection().prepareStatement(deleteAnimal);
+            deleteAnimalStatement.setInt(1, animalId);
+            int result = deleteAnimalStatement.executeUpdate();
+
+            if (result == 0) {
+                System.out.println("Не удалось удалить животное.");
+            } else {
+                System.out.println("Животное успешно удалено.");
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    public void deleteAppointment(Appointments appointment) {
+        String idDoctor = "SELECT id FROM doctors WHERE name = ? AND telephone = ?";
+        String idCheck = "SELECT id FROM appointments WHERE date = ? AND time = ? AND id_doctor = ?";
+        String deleteAppointment = "DELETE FROM appointments WHERE id = ?";
+
+        try {
+            if (appointment.getDate().isEmpty() || appointment.getTime().isEmpty() || appointment.getDoctor().isEmpty()) {
+                System.out.println("Не все поля заполнены.");
+                return;
+            }
+
+            PreparedStatement idCheckDoctor = getDbConnection().prepareStatement(idDoctor);
+            idCheckDoctor.setString(1, appointment.getDoctor().split(", ")[0]);
+            idCheckDoctor.setString(2, appointment.getDoctor().split(", ")[1]);
+            ResultSet idDoctorResultSet = idCheckDoctor.executeQuery();
+            if (!idDoctorResultSet.next()) {
+                System.out.println("Врач не найден.");
+                return;
+            }
+            int doctorId = idDoctorResultSet.getInt("id");
+
+            PreparedStatement idCheckStatement = getDbConnection().prepareStatement(idCheck);
+            idCheckStatement.setString(1, appointment.getDate());
+            idCheckStatement.setString(2, appointment.getTime());
+            idCheckStatement.setInt(3, doctorId);
+            ResultSet idCheckResultSet = idCheckStatement.executeQuery();
+            if (!idCheckResultSet.next()) {
+                System.out.println("Запись о приеме не найдена.");
+                return;
+            }
+            int appointmentId = idCheckResultSet.getInt("id");
+
+            PreparedStatement deleteAppointmentStatement = getDbConnection().prepareStatement(deleteAppointment);
+            deleteAppointmentStatement.setInt(1, appointmentId);
+            int result = deleteAppointmentStatement.executeUpdate();
+
+            if (result == 0) {
+                System.out.println("Не удалось удалить запись о приеме.");
+            } else {
+                System.out.println("Запись о приеме успешно удалена.");
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

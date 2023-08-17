@@ -26,6 +26,9 @@ public class Animals {
     public void addAnimal(Animals animal) throws SQLException, ClassNotFoundException {
         DataBaseControl.getInstance().addAnimal(animal);
     }
+    public void deleteAnimal(Animals animal) throws SQLException, ClassNotFoundException {
+        DataBaseControl.getInstance().deleteAnimal(animal);
+    }
 
     public String getName() {
         return name;
