@@ -759,4 +759,120 @@ public class DataBaseControl {
             throw new RuntimeException(e);
         }
     }
+    public void deleteDoctor(Doctors doctor) {
+        String idDoctor = "SELECT id, id_user FROM doctors WHERE name = ? AND telephone = ?";
+        String deleteAppointment = "DELETE FROM doctors WHERE id = ?";
+        String deleteUser = "DELETE FROM users WHERE id = ?";
+
+        try {
+            if (doctor.getName().isEmpty() || doctor.getTelephone().isEmpty()) {
+                System.out.println("Не все поля заполнены.");
+                return;
+            }
+
+            PreparedStatement idCheckDoctor = getDbConnection().prepareStatement(idDoctor);
+            idCheckDoctor.setString(1, doctor.getName());
+            idCheckDoctor.setString(2, doctor.getTelephone());
+            ResultSet idDoctorResultSet = idCheckDoctor.executeQuery();
+            if (!idDoctorResultSet.next()) {
+                System.out.println("Врач не найден.");
+                return;
+            }
+            int doctorId = idDoctorResultSet.getInt("id");
+            int userId = idDoctorResultSet.getInt("id_user");
+
+            PreparedStatement deleteAppointmentStatement = getDbConnection().prepareStatement(deleteAppointment);
+            deleteAppointmentStatement.setInt(1, doctorId);
+            int result1 = deleteAppointmentStatement.executeUpdate();
+
+            PreparedStatement deleteUserStatement = getDbConnection().prepareStatement(deleteUser);
+            deleteUserStatement.setInt(1, userId);
+            int result2 = deleteUserStatement.executeUpdate();
+
+            if (result1 > 0 || result2 > 0) {
+                System.out.println("Врач успешно удален.");
+            } else {
+                System.out.println("Не удалось удалить врача.");
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    public void deleteOwner(Owners owner) {
+        String idDoctor = "SELECT id, id_user FROM owners WHERE name = ? AND telephone = ?";
+        String deleteAppointment = "DELETE FROM owners WHERE id = ?";
+        String deleteUser = "DELETE FROM users WHERE id = ?";
+
+        try {
+            if (owner.getName().isEmpty() || owner.getTelephone().isEmpty()) {
+                System.out.println("Не все поля заполнены.");
+                return;
+            }
+
+            PreparedStatement idCheckDoctor = getDbConnection().prepareStatement(idDoctor);
+            idCheckDoctor.setString(1, owner.getName());
+            idCheckDoctor.setString(2, owner.getTelephone());
+            ResultSet idDoctorResultSet = idCheckDoctor.executeQuery();
+            if (!idDoctorResultSet.next()) {
+                System.out.println("Владелец не найден.");
+                return;
+            }
+            int doctorId = idDoctorResultSet.getInt("id");
+            int userId = idDoctorResultSet.getInt("id_user");
+
+            PreparedStatement deleteAppointmentStatement = getDbConnection().prepareStatement(deleteAppointment);
+            deleteAppointmentStatement.setInt(1, doctorId);
+            int result1 = deleteAppointmentStatement.executeUpdate();
+
+            PreparedStatement deleteUserStatement = getDbConnection().prepareStatement(deleteUser);
+            deleteUserStatement.setInt(1, userId);
+            int result2 = deleteUserStatement.executeUpdate();
+
+            if (result1 > 0 || result2 > 0) {
+                System.out.println("Владелец успешно удален.");
+            } else {
+                System.out.println("Не удалось удалить владельца.");
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    public void deleteAdministrator(Administrators admin) {
+        String idAdministrator = "SELECT administrators.id, administrators.id_user FROM administrators JOIN users ON administrators.id_user = users.id WHERE login = ?";
+        String deleteAdministrator = "DELETE FROM administrators WHERE id = ?";
+        String deleteUser = "DELETE FROM users WHERE id = ?";
+
+        try {
+            if (admin.getFirstName().isEmpty() || admin.getLastName().isEmpty() || admin.getSecondName().isEmpty()) {
+                System.out.println("Не все поля заполнены.");
+                return;
+            }
+
+            PreparedStatement idCheckAdministrator = getDbConnection().prepareStatement(idAdministrator);
+            idCheckAdministrator.setString(1, admin.getLogin());
+            ResultSet idAdministratorResultSet = idCheckAdministrator.executeQuery();
+            if (!idAdministratorResultSet.next()) {
+                System.out.println("Администратор не найден.");
+                return;
+            }
+            int administratorId = idAdministratorResultSet.getInt("id");
+            int userId = idAdministratorResultSet.getInt("id_user");
+
+            PreparedStatement deleteAdministratorStatement = getDbConnection().prepareStatement(deleteAdministrator);
+            deleteAdministratorStatement.setInt(1, administratorId);
+            int result1 = deleteAdministratorStatement.executeUpdate();
+
+            PreparedStatement deleteUserStatement = getDbConnection().prepareStatement(deleteUser);
+            deleteUserStatement.setInt(1, userId);
+            int result2 = deleteUserStatement.executeUpdate();
+
+            if (result1 > 0 || result2 > 0) {
+                System.out.println("Администратор успешно удален.");
+            } else {
+                System.out.println("Не удалось удалить администратора.");
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

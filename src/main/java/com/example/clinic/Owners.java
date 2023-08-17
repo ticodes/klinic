@@ -59,4 +59,7 @@ public class Owners extends User{
     public void addOwner(Owners owner) throws SQLException, ClassNotFoundException {
         DataBaseControl.getInstance().newOwner(owner);
     }
+    public void deleteOwner(Owners owner) throws SQLException, ClassNotFoundException {
+        DataBaseControl.getInstance().deleteOwner(owner);
+    }
 }

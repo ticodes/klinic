@@ -99,6 +99,23 @@ public class AdminDoctorsController {
                 }
             }
         });
+        delete.setOnAction(event -> {
+            if(!fieldName.getText().isEmpty() && !fieldTelephone.getText().isEmpty()) {
+                try {
+                    doctor.deleteDoctor(new Doctors(fieldName.getText(), fieldAddress.getText(), fieldTelephone.getText(), fieldLogin.getText(), fieldPassword.getText()));
+                    initialize();
+                    fieldName.clear();
+                    fieldAddress.clear();
+                    fieldTelephone.clear();
+                    fieldLogin.clear();
+                    fieldPassword.clear();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                } catch (ClassNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
 
         account();
         administrators();

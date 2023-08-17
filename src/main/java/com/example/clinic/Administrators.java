@@ -67,4 +67,7 @@ public class Administrators extends User{
     public void update(Administrators administrator) throws SQLException, ClassNotFoundException {
         DataBaseControl.getInstance().updateAdministrator(administrator);
     }
+    public void deleteAdministrator(Administrators admin) throws SQLException, ClassNotFoundException {
+        DataBaseControl.getInstance().deleteAdministrator(admin);
+    }
 }
