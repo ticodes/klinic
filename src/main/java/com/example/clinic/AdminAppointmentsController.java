@@ -69,9 +69,6 @@ public class AdminAppointmentsController {
     private ChoiceBox<String> fieldDoctor;
 
     @FXML
-    private ChoiceBox<String> fieldOwner;
-
-    @FXML
     private DatePicker fielddate;
 
     @FXML
@@ -92,7 +89,21 @@ public class AdminAppointmentsController {
     void initialize() throws SQLException, ClassNotFoundException {
         fillTable();
         getDataField();
-        fillChoiseOwner();
+
+        add.setOnAction(event -> {
+            if(!fielddate.getValue().equals("") && !fieldtime.getText().isEmpty() && !fieldAnimal.getValue().isEmpty() && !fieldDoctor.getValue().isEmpty()) {
+                try {
+                    appoint.addAppointment(new Appointments( String.valueOf(fielddate.getValue()), fieldtime.getText(), fieldDoctor.getValue(), fieldAnimal.getValue(), fieldAnimal.getValue()));
+                    initialize();
+                    fielddate.setValue(null);
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                } catch (ClassNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+
         fillChoiseDoctor();
         fillChoiseAnimal();
         account();
@@ -168,21 +179,11 @@ public class AdminAppointmentsController {
                 fielddate.setValue(LocalDate.parse(appointment.getDate()));
                 fieldtime.setText(appointment.getTime());
                 fieldDoctor.setValue(appointment.getDoctor());
-                fieldOwner.setValue(appointment.getOwner());
-                fieldAnimal.setValue(appointment.getAnimal());
+                fieldAnimal.setValue(appointment.getAnimal() + ". " + appointment.getOwner());
             }
         });
     }
-    public void fillChoiseOwner(){
-        List<Owners> owners = dbHandler.getTableOwners();
-        ObservableList<String> columnValues = FXCollections.observableArrayList();
 
-        for (Owners owner : owners) {
-            String columnValue = owner.getName() + ", " + owner.getTelephone();
-            columnValues.add(columnValue);
-            fieldOwner.setItems(columnValues);
-        }
-    }
     public void fillChoiseDoctor(){
         List<Doctors> doctors = dbHandler.getTableDoctors();
         ObservableList<String> columnValues = FXCollections.observableArrayList();
@@ -198,11 +199,10 @@ public class AdminAppointmentsController {
         ObservableList<String> columnValues = FXCollections.observableArrayList();
 
         for (Animals animal : animals) {
-            String columnValue = animal.getName() + " - " + animal.getBreed();
+            String columnValue = animal.getName() + " - " + animal.getBreed() + ". " + animal.getOwner();
             columnValues.add(columnValue);
             fieldAnimal.setItems(columnValues);
         }
     }
-
 }
 

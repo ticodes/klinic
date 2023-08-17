@@ -4,6 +4,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 import java.sql.SQLException;
+import java.time.LocalDate;
 
 public class Appointments {
     private ObservableList<Appointments> appointmentsObesrvableList;
@@ -12,6 +13,26 @@ public class Appointments {
     private String datetime;
     private String doctor;
     private String owner;
+
+    public String getOwnerAnimal() {
+        return ownerAnimal;
+    }
+
+    public void setOwnerAnimal(String ownerAnimal) {
+        this.ownerAnimal = ownerAnimal;
+    }
+
+    private String ownerAnimal;
+
+    public Appointments(String date, String time, String doctor, String animal, String owner) {
+        this.date = date;
+        this.time = time;
+        this.doctor = doctor;
+        this.animal = animal;
+        this.owner = owner;
+
+
+    }
 
     public String getDatetime() {
         return datetime;
@@ -77,5 +98,8 @@ public class Appointments {
 
     public void setOwner(String owner) {
         this.owner = owner;
+    }
+    public void addAppointment(Appointments appointment) throws SQLException, ClassNotFoundException {
+        DataBaseControl.getInstance().newAppointment(appointment);
     }
 }

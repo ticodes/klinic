@@ -2,6 +2,11 @@ package com.example.clinic;
 import javafx.collections.ObservableList;
 
 import java.sql.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -215,8 +220,8 @@ public class DataBaseControl {
                 String date = resultSet.getString("date");
                 String time = resultSet.getString("time");
                 String datetime = resultSet.getString("date")  + " " + resultSet.getString("time");
-                String doctor = resultSet.getString("doctors.name") + ", " + resultSet.getString("telephone");
-                String owner = resultSet.getString("owners.name") + ", " + resultSet.getString("telephone");
+                String doctor = resultSet.getString("doctors.name") + ", " + resultSet.getString("doctors.telephone");
+                String owner = resultSet.getString("owners.name") + ", " + resultSet.getString("owners.telephone");
                 String animal = resultSet.getString("animals.name") + " - " + resultSet.getString("breeds.name");
                 Appointments appointment = new Appointments(date, time, doctor, owner, animal, datetime);
                 appointments.add(appointment);
@@ -474,5 +479,152 @@ public class DataBaseControl {
             throw new RuntimeException(e);
         }
     }
+    public void newAppointment(Appointments appointment) {
+        try {
+            // Проверяем, что атрибут owner не равен null
+            if (appointment.getOwner() == null) {
+                throw new IllegalArgumentException("Не удалось получить данные owner.");
+            }
 
+            // Получаем id породы по ее названию
+            String selectBreedId = "SELECT animals.id FROM animals JOIN breeds ON animals.id_breed = breeds.id WHERE animals.name = ? AND breeds.name = ?";
+            PreparedStatement breedIdStatement = getDbConnection().prepareStatement(selectBreedId);
+            breedIdStatement.setString(1, appointment.getAnimal().split(" - ")[0].split("\\.")[0]);
+            breedIdStatement.setString(2, appointment.getAnimal().split(" - ")[1].split("\\.")[0]);
+            ResultSet breedIdResultSet = breedIdStatement.executeQuery();
+            int breedId;
+            if (breedIdResultSet.next()) {
+                breedId = breedIdResultSet.getInt("id");
+            } else {
+                throw new IllegalArgumentException("Порода с названием " + appointment.getAnimal().split(" - ")[1].split("\\.")[0] + " не найдена.");
+            }
+
+            // Получаем id владельца по его имени и телефону
+            String selectOwnerId = "SELECT id FROM owners WHERE name = ? AND telephone = ?";
+            PreparedStatement ownerIdStatement = getDbConnection().prepareStatement(selectOwnerId);
+            ownerIdStatement.setString(1, appointment.getAnimal().split(" - ")[1].split("\\. ")[1].split(", ")[0]);
+            ownerIdStatement.setString(2, appointment.getAnimal().split(" - ")[1].split("\\. ")[1].split(", ")[1]);
+            ResultSet ownerIdResultSet = ownerIdStatement.executeQuery();
+            int ownerId;
+            if (ownerIdResultSet.next()) {
+                ownerId = ownerIdResultSet.getInt("id");
+            } else {
+                throw new IllegalArgumentException("Владелец с именем " + appointment.getAnimal().split(" - ")[1].split("\\. ")[1].split(", ")[0] + " и номером телефона " + appointment.getAnimal().split(" - ")[1].split("\\. ")[1].split(", ")[1] + " не найден.");
+            }
+
+            // Получаем id доктора по его имени и телефону
+            String selectDoctorId = "SELECT id FROM doctors WHERE name = ? AND telephone = ?";
+            PreparedStatement doctorIdStatement = getDbConnection().prepareStatement(selectDoctorId);
+            doctorIdStatement.setString(1, appointment.getDoctor().split(", ")[0]);
+            doctorIdStatement.setString(2, appointment.getDoctor().split(", ")[1]);
+            ResultSet doctorIdResultSet = doctorIdStatement.executeQuery();
+            int doctorId;
+            if (doctorIdResultSet.next()) {
+                doctorId = doctorIdResultSet.getInt("id");
+            } else {
+                throw new IllegalArgumentException("Доктор с именем " + appointment.getDoctor().split(", ")[0] + " и номером телефона " + appointment.getDoctor().split(", ")[1] + " не найден.");
+            }
+
+            // Преобразуем формат даты в формат MySQL
+            String date = appointment.getDate();
+            //DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+            //LocalDate parsedDate = LocalDate.parse(date, inputFormatter);
+            //String formattedDate = parsedDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+
+            // Добавляем новый прием в таблицу appointments
+            String insertAppointment = "INSERT INTO appointments (id_animal, id_owner, id_doctor, date, time) VALUES (?, ?, ?, ?, ?)";
+            PreparedStatement insertAppointmentStatement = getDbConnection().prepareStatement(insertAppointment);
+            insertAppointmentStatement.setInt(1, breedId);
+            insertAppointmentStatement.setInt(2, ownerId);
+            insertAppointmentStatement.setInt(3, doctorId);
+            insertAppointmentStatement.setString(4, date);
+            insertAppointmentStatement.setString(5, appointment.getTime());
+            int result = insertAppointmentStatement.executeUpdate();
+
+            if (result == 1) {
+                System.out.println("Новый прием успешно добавлен.");
+            } else {
+                System.out.println("Не удалось добавить новый прием.");
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    public void updateAdministrator(Administrators administrator) {
+        String select = "SELECT * FROM users JOIN administrators ON users.id = administrators.id_user WHERE login = ?";
+        String selectByUsername = "SELECT * FROM users WHERE login = ?";
+        String updateAdmins = "UPDATE administrators SET first_name = ?, last_name = ?, second_name = ? WHERE id_user = ?";
+        String updateUser = "UPDATE users SET password = ? WHERE id = ?";
+
+        try {
+            // Проверяем, не существует ли уже такой логин
+            PreparedStatement usernameCheckSt = getInstance().getDbConnection().prepareStatement(selectByUsername);
+            usernameCheckSt.setString(1, administrator.getLogin());
+            ResultSet usernameCheckRes = usernameCheckSt.executeQuery();
+            if (usernameCheckRes.next()) {
+                int userIdExisting = usernameCheckRes.getInt("id");
+                int userIdToUpdate = getUserIdByLogin(administrator.getLogin()); // метод для получения id пользователя по логину
+
+                if (userIdToUpdate != 0 && userIdExisting != userIdToUpdate) {
+                    System.out.println("Логин уже существует.");
+                    return;
+                }
+            }
+
+            PreparedStatement selectStatement = getInstance().getDbConnection().prepareStatement(select);
+            selectStatement.setString(1, MainController.getUserLogin());
+            ResultSet resultSet = selectStatement.executeQuery();
+
+            if (resultSet.next()) {
+                int userId = resultSet.getInt("id_user");
+
+                // Захешируем пароль, если он указан
+                String hashedPassword = null;
+                if (administrator.getPassword() != null && !administrator.getPassword().isEmpty()) {
+                    hashedPassword = PasswordHasher.hashPassword(administrator.getPassword());
+                }
+
+                PreparedStatement updateAdminsStatement = getInstance().getDbConnection().prepareStatement(updateAdmins);
+                updateAdminsStatement.setString(1, administrator.getFirstName());
+                updateAdminsStatement.setString(2, administrator.getLastName());
+                updateAdminsStatement.setString(3, administrator.getSecondName());
+                updateAdminsStatement.setInt(4, userId);
+                int rowsAffectedAdmins = updateAdminsStatement.executeUpdate();
+
+                PreparedStatement updateUserStatement = getInstance().getDbConnection().prepareStatement(updateUser);
+                if (hashedPassword != null) {
+                    updateUserStatement.setString(1, hashedPassword);
+                } else {
+                    updateUserStatement.setNull(1, java.sql.Types.VARCHAR);
+                }
+                updateUserStatement.setInt(2, userId);
+                int rowsAffectedUser = updateUserStatement.executeUpdate();
+
+                if (rowsAffectedAdmins == 1 || rowsAffectedUser == 1) {
+                    System.out.println("Данные администратора успешно обновлены.");
+                } else {
+                    System.out.println("Не удалось обновить данные администратора.");
+                }
+            } else {
+                System.out.println("Администратор не найден.");
+            }
+        } catch (SQLException | ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private int getUserIdByLogin(String login) throws SQLException, ClassNotFoundException {
+        String selectUserId = "SELECT id FROM users WHERE login = ?";
+        PreparedStatement selectUserIdStatement = getInstance().getDbConnection().prepareStatement(selectUserId);
+        selectUserIdStatement.setString(1, login);
+        ResultSet userIdResultSet = selectUserIdStatement.executeQuery();
+
+        if (userIdResultSet.next()) {
+            return userIdResultSet.getInt("id");
+        }
+
+        return 0;
+    }
 }

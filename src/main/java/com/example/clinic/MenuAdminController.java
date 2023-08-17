@@ -65,6 +65,21 @@ public class MenuAdminController {
 
         exit();
         fillData();
+
+        save.setOnAction(event -> {
+            if(!firstName.getText().isEmpty() && !lastName.getText().isEmpty() && !secondName.getText().isEmpty() && !login.getText().isEmpty() && !password.getText().isEmpty()) {
+                try {
+                    admin.update(new Administrators(firstName.getText(), lastName.getText(), secondName.getText(), login.getText(), password.getText()));
+                    initialize();
+                    password.clear();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                } catch (ClassNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+
         administrators();
         doctors();
         owners();
