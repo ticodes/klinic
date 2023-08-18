@@ -59,6 +59,8 @@ public class MainController {
                                 Window.changeWindow(event, "menuAdmin.fxml", "Ветеринарная клиника");
                             } else if (role.equals("Врач")) {
                                 Window.changeWindow(event, "menuDoctor.fxml", "Ветеринарная клиника");
+                            } else if (role.equals("Клиент")) {
+                                Window.changeWindow(event, "menuOwner.fxml", "Ветеринарная клиника");
                             }
                         } else {
                             System.out.println("Неверный пароль"); // Пароль не соответствует

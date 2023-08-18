@@ -52,7 +52,6 @@ public class MenuDoctorController {
 
     @FXML
     void initialize() throws SQLException, ClassNotFoundException {
-
         fillData();
         appointments();
         animals();

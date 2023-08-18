@@ -525,11 +525,7 @@ public class DataBaseControl {
                 throw new IllegalArgumentException("Доктор с именем " + appointment.getDoctor().split(", ")[0] + " и номером телефона " + appointment.getDoctor().split(", ")[1] + " не найден.");
             }
 
-            // Преобразуем формат даты в формат MySQL
             String date = appointment.getDate();
-            //DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
-            //LocalDate parsedDate = LocalDate.parse(date, inputFormatter);
-            //String formattedDate = parsedDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 
             // Добавляем новый прием в таблицу appointments
             String insertAppointment = "INSERT INTO appointments (id_animal, id_owner, id_doctor, date, time) VALUES (?, ?, ?, ?, ?)";
@@ -874,5 +870,21 @@ public class DataBaseControl {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+    public String searchOwner() {
+        String name = "";
+        String nameOwner = "SELECT owners.name AS ownerName, owners.telephone AS ownerTelephone FROM owners JOIN users ON owners.id_user = users.id WHERE login = ?";
+        try (PreparedStatement stmt = getDbConnection().prepareStatement(nameOwner)) {
+            stmt.setString(1, MainController.getUserLogin());
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (!rs.next()) {
+                    return "Владелец не найден.";
+                }
+                name = rs.getString("ownerName") + ", " + rs.getString("ownerTelephone");
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return name;
     }
 }
