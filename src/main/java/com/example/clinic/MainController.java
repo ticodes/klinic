@@ -50,22 +50,26 @@ public class MainController {
                 ResultSet result = dbHandler.getUser(user);
                 try {
                     if (result.next()) {
-                        //String passwordFromDB = result.getString("password");
-                        String role = result.getString("role");
-                        userLogin = loginText;
-                        if (role.equals("Администратор")){
-                            Window.changeWindow(event, "menuAdmin.fxml", "Ветеринарная клиника");
+                        String passwordFromDB = result.getString("password"); // Получаем хэш пароля из базы данных
+                        String hashedPassword = PasswordHasher.hashPassword(loginPassword); // Хэшируем введенный пользователем пароль
+                        if (passwordFromDB.equals(hashedPassword)) { // Сравниваем хэшированные пароли
+                            String role = result.getString("role");
+                            userLogin = loginText;
+                            if (role.equals("Администратор")) {
+                                Window.changeWindow(event, "menuAdmin.fxml", "Ветеринарная клиника");
+                            } else if (role.equals("Врач")) {
+                                Window.changeWindow(event, "menuDoctor.fxml", "Ветеринарная клиника");
+                            }
+                        } else {
+                            System.out.println("Неверный пароль"); // Пароль не соответствует
                         }
-                        else {
-                            Window.changeWindow(event, "registration.fxml", "Ветеринарная клиника");
-                        }
-
+                    } else {
+                        System.out.println("Пользователь не найден"); // Пользователь не найден
                     }
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
                 }
             }
-
         });
     }
     public void registration(){
