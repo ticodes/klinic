@@ -60,10 +60,17 @@ public class MenuDoctorController {
 
     }
     public void fillData() throws SQLException, ClassNotFoundException {
-        name.setText(String.valueOf(doctor.getObservableList().get(0).getName()));
-        address.setText(String.valueOf(doctor.getObservableList().get(0).getAddress()));
-        telephone.setText(String.valueOf(doctor.getObservableList().get(0).getTelephone()));
-        login.setText(String.valueOf(doctor.getObservableList().get(0).getLogin()));
+        String searchResult = DataBaseControl.getInstance().searchDoctor(); // Получаем результат из dbHandler.searchOwner()
+
+        for (Doctors doctor : doctor.getObservableList()) { // Цикл по всем элементам списка
+            if (doctor.getName().equals(searchResult.split(", ")[0]) && doctor.getTelephone().equals(searchResult.split(", ")[1])) {
+                name.setText(String.valueOf(doctor.getName()));
+                address.setText(String.valueOf(doctor.getAddress()));
+                telephone.setText(String.valueOf(doctor.getTelephone()));
+                login.setText(String.valueOf(doctor.getLogin()));
+                return; // Завершаем метод после заполнения данных
+            }
+        }
     }
 
     public void appointments(){

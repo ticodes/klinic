@@ -95,10 +95,17 @@ public class MenuAdminController {
         });
     }
     public void fillData() throws SQLException, ClassNotFoundException {
-        lastName.setText(String.valueOf(admin.getObservableList().get(0).getLastName()));
-        firstName.setText(String.valueOf(admin.getObservableList().get(0).getFirstName()));
-        secondName.setText(String.valueOf(admin.getObservableList().get(0).getSecondName()));
-        login.setText(String.valueOf(admin.getObservableList().get(0).getLogin()));
+        String searchResult = DataBaseControl.getInstance().searchAdmin(); // Получаем результат из dbHandler.searchOwner()
+
+        for (Administrators admin : admin.getObservableList()) { // Цикл по всем элементам списка
+            if (admin.getLastName().equals(searchResult.split(" ")[0]) && admin.getFirstName().equals(searchResult.split(" ")[1]) && admin.getSecondName().equals(searchResult.split(" ")[2])){
+                lastName.setText(String.valueOf(admin.getLastName()));
+                firstName.setText(String.valueOf(admin.getFirstName()));
+                secondName.setText(String.valueOf(admin.getSecondName()));
+                login.setText(String.valueOf(admin.getLogin()));
+                return; // Завершаем метод после заполнения данных
+            }
+        }
     }
     public void administrators(){
         administrators.setOnAction(event -> {

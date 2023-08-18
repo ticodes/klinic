@@ -57,10 +57,17 @@ public class MenuOwnerController {
 
     }
     public void fillData() throws SQLException, ClassNotFoundException {
-        lastName.setText(String.valueOf(owner.getObservableList().get(0).getName()));
-        firstName.setText(String.valueOf(owner.getObservableList().get(0).getAddress()));
-        secondName.setText(String.valueOf(owner.getObservableList().get(0).getTelephone()));
-        login.setText(String.valueOf(owner.getObservableList().get(0).getLogin()));
+        String searchResult = DataBaseControl.getInstance().searchOwner(); // Получаем результат из dbHandler.searchOwner()
+
+        for (Owners owner : owner.getObservableList()) { // Цикл по всем элементам списка
+            if (owner.getName().equals(searchResult.split(", ")[0]) && owner.getTelephone().equals(searchResult.split(", ")[1])) {
+                lastName.setText(String.valueOf(owner.getName()));
+                firstName.setText(String.valueOf(owner.getAddress()));
+                secondName.setText(String.valueOf(owner.getTelephone()));
+                login.setText(String.valueOf(owner.getLogin()));
+                return; // Завершаем метод после заполнения данных
+            }
+        }
     }
     public void exit(){
         exit.setOnAction(event -> {

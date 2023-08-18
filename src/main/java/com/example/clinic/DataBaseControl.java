@@ -546,8 +546,6 @@ public class DataBaseControl {
             throw new RuntimeException(e);
         }
     }
-
-
     public void updateAdministrator(Administrators administrator) {
         String select = "SELECT * FROM users JOIN administrators ON users.id = administrators.id_user WHERE login = ?";
         String selectByUsername = "SELECT * FROM users WHERE login = ?";
@@ -610,7 +608,6 @@ public class DataBaseControl {
             throw new RuntimeException(e);
         }
     }
-
     private int getUserIdByLogin(String login) throws SQLException, ClassNotFoundException {
         String selectUserId = "SELECT id FROM users WHERE login = ?";
         PreparedStatement selectUserIdStatement = getInstance().getDbConnection().prepareStatement(selectUserId);
@@ -881,6 +878,38 @@ public class DataBaseControl {
                     return "Владелец не найден.";
                 }
                 name = rs.getString("ownerName") + ", " + rs.getString("ownerTelephone");
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return name;
+    }
+    public String searchDoctor() {
+        String name = "";
+        String nameOwner = "SELECT doctors.name AS ownerName, doctors.telephone AS ownerTelephone FROM doctors JOIN users ON doctors.id_user = users.id WHERE login = ?";
+        try (PreparedStatement stmt = getDbConnection().prepareStatement(nameOwner)) {
+            stmt.setString(1, MainController.getUserLogin());
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (!rs.next()) {
+                    return "Врач не найден.";
+                }
+                name = rs.getString("ownerName") + ", " + rs.getString("ownerTelephone");
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return name;
+    }
+    public String searchAdmin() {
+        String name = "";
+        String nameOwner = "SELECT first_name, last_name, second_name FROM administrators JOIN users ON administrators.id_user = users.id WHERE login = ?";
+        try (PreparedStatement stmt = getDbConnection().prepareStatement(nameOwner)) {
+            stmt.setString(1, MainController.getUserLogin());
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (!rs.next()) {
+                    return "Врач не найден.";
+                }
+                name = rs.getString("last_name") + " " + rs.getString("first_name") + " " + rs.getString("second_name");
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
