@@ -61,4 +61,7 @@ public class Doctors extends User{
     public void deleteDoctor(Doctors doctor) throws SQLException, ClassNotFoundException {
         DataBaseControl.getInstance().deleteDoctor(doctor);
     }
+    public void update(Doctors doctor) throws SQLException, ClassNotFoundException {
+        DataBaseControl.getInstance().updateDoctor(doctor);
+    }
 }

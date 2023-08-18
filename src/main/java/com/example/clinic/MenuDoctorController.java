@@ -57,7 +57,21 @@ public class MenuDoctorController {
         animals();
         breeds();
         exit();
-
+        save.setOnAction(event -> {
+            if(!name.getText().isEmpty() && !address.getText().isEmpty() && !telephone.getText().isEmpty() && !login.getText().isEmpty() && !password.getText().isEmpty()) {
+                try {
+                    doctor.update(new Doctors(name.getText(), address.getText(), telephone.getText(), login.getText(), password.getText()));
+                    initialize();
+                    password.clear();
+                    String newLogin = login.getText();
+                    MainController.setUserLogin(newLogin);
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                } catch (ClassNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
     }
     public void fillData() throws SQLException, ClassNotFoundException {
         String searchResult = DataBaseControl.getInstance().searchDoctor(); // Получаем результат из dbHandler.searchOwner()

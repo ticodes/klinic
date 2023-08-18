@@ -83,5 +83,8 @@ public class MainController {
     public static String getUserLogin() {
         return userLogin;
     }
+    public static void setUserLogin(String login) {
+        userLogin = login;
+    }
 
 }

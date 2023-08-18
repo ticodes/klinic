@@ -72,6 +72,8 @@ public class MenuAdminController {
                     admin.update(new Administrators(firstName.getText(), lastName.getText(), secondName.getText(), login.getText(), password.getText()));
                     initialize();
                     password.clear();
+                    String newLogin = login.getText();
+                    MainController.setUserLogin(newLogin);
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
                 } catch (ClassNotFoundException e) {

@@ -550,29 +550,33 @@ public class DataBaseControl {
         String select = "SELECT * FROM users JOIN administrators ON users.id = administrators.id_user WHERE login = ?";
         String selectByUsername = "SELECT * FROM users WHERE login = ?";
         String updateAdmins = "UPDATE administrators SET first_name = ?, last_name = ?, second_name = ? WHERE id_user = ?";
-        String updateUser = "UPDATE users SET password = ? WHERE id = ?";
+        String updateUser = "UPDATE users SET login = ?, password = ? WHERE id = ?"; // Добавлено обновление логина
 
         try {
-            // Проверяем, не существует ли уже такой логин
-            PreparedStatement usernameCheckSt = getInstance().getDbConnection().prepareStatement(selectByUsername);
-            usernameCheckSt.setString(1, administrator.getLogin());
-            ResultSet usernameCheckRes = usernameCheckSt.executeQuery();
-            if (usernameCheckRes.next()) {
-                int userIdExisting = usernameCheckRes.getInt("id");
-                int userIdToUpdate = getUserIdByLogin(administrator.getLogin()); // метод для получения id пользователя по логину
-
-                if (userIdToUpdate != 0 && userIdExisting != userIdToUpdate) {
-                    System.out.println("Логин уже существует.");
-                    return;
-                }
-            }
-
+            // Проверяем, не совпадает ли текущий логин с новым логином
             PreparedStatement selectStatement = getInstance().getDbConnection().prepareStatement(select);
             selectStatement.setString(1, MainController.getUserLogin());
             ResultSet resultSet = selectStatement.executeQuery();
 
             if (resultSet.next()) {
                 int userId = resultSet.getInt("id_user");
+                String currentLogin = resultSet.getString("login");
+
+                // Проверяем, не совпадает ли текущий логин с новым логином
+                if (!currentLogin.equals(administrator.getLogin())) {
+                    // Проверяем, не существует ли уже такой логин
+                    PreparedStatement usernameCheckSt = getInstance().getDbConnection().prepareStatement(selectByUsername);
+                    usernameCheckSt.setString(1, administrator.getLogin());
+                    ResultSet usernameCheckRes = usernameCheckSt.executeQuery();
+                    if (usernameCheckRes.next()) {
+                        int userIdToUpdate = getUserIdByLogin(administrator.getLogin()); // метод для получения id пользователя по логину
+
+                        if (userIdToUpdate != 0 && userIdToUpdate != userId) {
+                            System.out.println("Логин уже существует.");
+                            return;
+                        }
+                    }
+                }
 
                 // Захешируем пароль, если он указан
                 String hashedPassword = null;
@@ -588,12 +592,17 @@ public class DataBaseControl {
                 int rowsAffectedAdmins = updateAdminsStatement.executeUpdate();
 
                 PreparedStatement updateUserStatement = getInstance().getDbConnection().prepareStatement(updateUser);
-                if (hashedPassword != null) {
-                    updateUserStatement.setString(1, hashedPassword);
+                if (!currentLogin.equals(administrator.getLogin())) {
+                    updateUserStatement.setString(1, administrator.getLogin()); // Обновляем логин
                 } else {
-                    updateUserStatement.setNull(1, java.sql.Types.VARCHAR);
+                    updateUserStatement.setString(1, currentLogin); // Оставляем текущий логин
                 }
-                updateUserStatement.setInt(2, userId);
+                if (hashedPassword != null) {
+                    updateUserStatement.setString(2, hashedPassword);
+                } else {
+                    updateUserStatement.setNull(2, java.sql.Types.VARCHAR);
+                }
+                updateUserStatement.setInt(3, userId);
                 int rowsAffectedUser = updateUserStatement.executeUpdate();
 
                 if (rowsAffectedAdmins == 1 || rowsAffectedUser == 1) {
@@ -915,5 +924,139 @@ public class DataBaseControl {
             throw new RuntimeException(e);
         }
         return name;
+    }
+    public void updateDoctor(Doctors doctor) {
+        String select = "SELECT * FROM users JOIN doctors ON users.id = doctors.id_user WHERE login = ?";
+        String selectByUsername = "SELECT * FROM users WHERE login = ?";
+        String updateDoctors = "UPDATE doctors SET name = ?, address = ?, telephone = ? WHERE id_user = ?";
+        String updateUser = "UPDATE users SET login = ?, password = ? WHERE id = ?";
+
+        try {
+            PreparedStatement selectStatement = getInstance().getDbConnection().prepareStatement(select);
+            selectStatement.setString(1, MainController.getUserLogin());
+            ResultSet resultSet = selectStatement.executeQuery();
+
+            if (resultSet.next()) {
+                int userId = resultSet.getInt("id_user");
+                String currentLogin = resultSet.getString("login");
+
+                if (!currentLogin.equals(doctor.getLogin())) {
+                    PreparedStatement usernameCheckSt = getInstance().getDbConnection().prepareStatement(selectByUsername);
+                    usernameCheckSt.setString(1, doctor.getLogin());
+                    ResultSet usernameCheckRes = usernameCheckSt.executeQuery();
+                    if (usernameCheckRes.next()) {
+                        int userIdToUpdate = getUserIdByLogin(doctor.getLogin());
+
+                        if (userIdToUpdate != 0 && userIdToUpdate != userId) {
+                            System.out.println("Логин уже существует.");
+                            return;
+                        }
+                    }
+                }
+
+                String hashedPassword = null;
+                if (doctor.getPassword() != null && !doctor.getPassword().isEmpty()) {
+                    hashedPassword = PasswordHasher.hashPassword(doctor.getPassword());
+                }
+
+                PreparedStatement updateDoctorsStatement = getInstance().getDbConnection().prepareStatement(updateDoctors);
+                updateDoctorsStatement.setString(1, doctor.getName());
+                updateDoctorsStatement.setString(2, doctor.getAddress());
+                updateDoctorsStatement.setString(3, doctor.getTelephone());
+                updateDoctorsStatement.setInt(4, userId);
+                int rowsAffectedDoctors = updateDoctorsStatement.executeUpdate();
+
+                PreparedStatement updateUserStatement = getInstance().getDbConnection().prepareStatement(updateUser);
+                if (!currentLogin.equals(doctor.getLogin())) {
+                    updateUserStatement.setString(1, doctor.getLogin());
+                } else {
+                    updateUserStatement.setString(1, currentLogin);
+                }
+                if (hashedPassword != null) {
+                    updateUserStatement.setString(2, hashedPassword);
+                } else {
+                    updateUserStatement.setNull(2, java.sql.Types.VARCHAR);
+                }
+                updateUserStatement.setInt(3, userId);
+                int rowsAffectedUser = updateUserStatement.executeUpdate();
+
+                if (rowsAffectedDoctors == 1 || rowsAffectedUser == 1) {
+                    System.out.println("Данные врача успешно обновлены.");
+                } else {
+                    System.out.println("Не удалось обновить данные врача.");
+                }
+            } else {
+                System.out.println("Врач не найден.");
+            }
+        } catch (SQLException | ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    public void updateOwner(Owners owner) {
+        String select = "SELECT * FROM users JOIN owners ON users.id = owners.id_user WHERE login = ?";
+        String selectByUsername = "SELECT * FROM users WHERE login = ?";
+        String updateDoctors = "UPDATE owners SET name = ?, address = ?, telephone = ? WHERE id_user = ?";
+        String updateUser = "UPDATE users SET login = ?, password = ? WHERE id = ?";
+
+        try {
+            PreparedStatement selectStatement = getInstance().getDbConnection().prepareStatement(select);
+            selectStatement.setString(1, MainController.getUserLogin());
+            ResultSet resultSet = selectStatement.executeQuery();
+
+            if (resultSet.next()) {
+                int userId = resultSet.getInt("id_user");
+                String currentLogin = resultSet.getString("login");
+
+                if (!currentLogin.equals(owner.getLogin())) {
+                    PreparedStatement usernameCheckSt = getInstance().getDbConnection().prepareStatement(selectByUsername);
+                    usernameCheckSt.setString(1, owner.getLogin());
+                    ResultSet usernameCheckRes = usernameCheckSt.executeQuery();
+                    if (usernameCheckRes.next()) {
+                        int userIdToUpdate = getUserIdByLogin(owner.getLogin());
+
+                        if (userIdToUpdate != 0 && userIdToUpdate != userId) {
+                            System.out.println("Логин уже существует.");
+                            return;
+                        }
+                    }
+                }
+
+                String hashedPassword = null;
+                if (owner.getPassword() != null && !owner.getPassword().isEmpty()) {
+                    hashedPassword = PasswordHasher.hashPassword(owner.getPassword());
+                }
+
+                PreparedStatement updateDoctorsStatement = getInstance().getDbConnection().prepareStatement(updateDoctors);
+                updateDoctorsStatement.setString(1, owner.getName());
+                updateDoctorsStatement.setString(2, owner.getAddress());
+                updateDoctorsStatement.setString(3, owner.getTelephone());
+                updateDoctorsStatement.setInt(4, userId);
+                int rowsAffectedDoctors = updateDoctorsStatement.executeUpdate();
+
+                PreparedStatement updateUserStatement = getInstance().getDbConnection().prepareStatement(updateUser);
+                if (!currentLogin.equals(owner.getLogin())) {
+                    updateUserStatement.setString(1, owner.getLogin());
+                } else {
+                    updateUserStatement.setString(1, currentLogin);
+                }
+                if (hashedPassword != null) {
+                    updateUserStatement.setString(2, hashedPassword);
+                } else {
+                    updateUserStatement.setNull(2, java.sql.Types.VARCHAR);
+                }
+                updateUserStatement.setInt(3, userId);
+                int rowsAffectedUser = updateUserStatement.executeUpdate();
+
+                if (rowsAffectedDoctors == 1 || rowsAffectedUser == 1) {
+                    System.out.println("Данные владельца успешно обновлены.");
+                } else {
+                    System.out.println("Не удалось обновить данные владельца.");
+                }
+            } else {
+                System.out.println("Владелец не найден.");
+            }
+        } catch (SQLException | ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

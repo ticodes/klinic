@@ -54,6 +54,21 @@ public class MenuOwnerController {
         appointments();
         animals();
         fillData();
+        save.setOnAction(event -> {
+            if(!lastName.getText().isEmpty() && !firstName.getText().isEmpty() && !secondName.getText().isEmpty() && !login.getText().isEmpty() && !password.getText().isEmpty()) {
+                try {
+                    owner.update(new Owners(lastName.getText(), firstName.getText(), secondName.getText(), login.getText(), password.getText()));
+                    initialize();
+                    password.clear();
+                    String newLogin = login.getText();
+                    MainController.setUserLogin(newLogin);
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                } catch (ClassNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
 
     }
     public void fillData() throws SQLException, ClassNotFoundException {
