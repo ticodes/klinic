@@ -209,8 +209,15 @@ public class DataBaseControl {
     public List<Appointments> getTableAppointments() {
         List<Appointments> appointments = new ArrayList<>();
         ResultSet resultSet = null;
-        String select = "SELECT * FROM appointments JOIN doctors ON doctors.id = appointments.id_doctor JOIN owners ON owners.id = " +
-                "appointments.id_owner JOIN animals ON animals.id = appointments.id_animal JOIN breeds ON breeds.id = animals.id_breed";
+        String select = "SELECT appointments.*, doctors.name AS doctor_name, doctors.telephone AS doctor_telephone, owners.name AS owner_name, owners.telephone AS owner_telephone, animals.name AS animal_name, breeds.name AS breed_name, GROUP_CONCAT(diseases.scientific_name SEPARATOR ', ') AS concatenated_diseases " +
+                "FROM appointments " +
+                "JOIN doctors ON doctors.id = appointments.id_doctor " +
+                "JOIN owners ON owners.id = appointments.id_owner " +
+                "JOIN animals ON animals.id = appointments.id_animal " +
+                "JOIN breeds ON breeds.id = animals.id_breed " +
+                "JOIN appointment_disease ON appointment_disease.id_appointment = appointments.id " +
+                "JOIN diseases ON diseases.id = appointment_disease.id_disease " +
+                "GROUP BY appointments.id";
 
         try {
             PreparedStatement prSt = getInstance().getDbConnection().prepareStatement(select);
@@ -219,11 +226,12 @@ public class DataBaseControl {
             while (resultSet.next()) {
                 String date = resultSet.getString("date");
                 String time = resultSet.getString("time");
-                String datetime = resultSet.getString("date")  + " " + resultSet.getString("time");
-                String doctor = resultSet.getString("doctors.name") + ", " + resultSet.getString("doctors.telephone");
-                String owner = resultSet.getString("owners.name") + ", " + resultSet.getString("owners.telephone");
-                String animal = resultSet.getString("animals.name") + " - " + resultSet.getString("breeds.name");
-                Appointments appointment = new Appointments(date, time, doctor, owner, animal, datetime);
+                String datetime = resultSet.getString("date") + " " + resultSet.getString("time");
+                String doctor = resultSet.getString("doctor_name") + ", " + resultSet.getString("doctor_telephone");
+                String owner = resultSet.getString("owner_name") + ", " + resultSet.getString("owner_telephone");
+                String animal = resultSet.getString("animal_name") + " - " + resultSet.getString("breed_name");
+                String diseases = resultSet.getString("concatenated_diseases");
+                Appointments appointment = new Appointments(date, time, doctor, animal, owner, datetime, diseases);
                 appointments.add(appointment);
             }
         } catch (SQLException | ClassNotFoundException e) {
@@ -524,6 +532,17 @@ public class DataBaseControl {
             } else {
                 throw new IllegalArgumentException("Доктор с именем " + appointment.getDoctor().split(", ")[0] + " и номером телефона " + appointment.getDoctor().split(", ")[1] + " не найден.");
             }
+            // Получаем id заболевания по его научному названию
+            String selectDiseaseId = "SELECT id FROM diseases WHERE scientific_name = ?";
+            PreparedStatement diseaseIdStatement = getDbConnection().prepareStatement(selectDiseaseId);
+            diseaseIdStatement.setString(1, appointment.getDisease());
+            ResultSet diseaseIdResultSet = diseaseIdStatement.executeQuery();
+            int diseaseId;
+            if (diseaseIdResultSet.next()) {
+                diseaseId = diseaseIdResultSet.getInt("id");
+            } else {
+                throw new IllegalArgumentException("Заболевание с научным названием " + appointment.getDisease() + " не найдено.");
+            }
 
             String date = appointment.getDate();
 
@@ -542,6 +561,27 @@ public class DataBaseControl {
             } else {
                 System.out.println("Не удалось добавить новый прием.");
             }
+
+            // Получаем id приема
+            String selectAppointmentId = "SELECT id FROM appointments WHERE date = ? AND time = ? AND id_doctor = ?";
+            PreparedStatement appointmentIdStatement = getDbConnection().prepareStatement(selectAppointmentId);
+            appointmentIdStatement.setString(1, date);
+            appointmentIdStatement.setString(2, appointment.getTime());
+            appointmentIdStatement.setInt(3, doctorId);
+            ResultSet appointmentIdResultSet = appointmentIdStatement.executeQuery();
+            int appointmentId;
+            if (appointmentIdResultSet.next()) {
+                appointmentId = appointmentIdResultSet.getInt("id");
+            } else {
+                throw new IllegalArgumentException("Прием не найден.");
+            }
+            // Добавляем новый прием в таблицу appointment_disease
+            String insertAppointmentDisease = "INSERT INTO appointment_disease (id_appointment, id_disease) VALUES (?, ?)";
+            PreparedStatement insertAppointmentDiseaseStatement = getDbConnection().prepareStatement(insertAppointmentDisease);
+            insertAppointmentDiseaseStatement.setInt(1, appointmentId);
+            insertAppointmentDiseaseStatement.setInt(2, diseaseId);
+            int result2 = insertAppointmentDiseaseStatement.executeUpdate();
+
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -1080,5 +1120,71 @@ public class DataBaseControl {
         }
 
         return diseases;
+    }
+    public void newDisease(Diseases disease) {
+        String usernameCheck = "SELECT * FROM diseases WHERE common_name =? AND scientific_name = ?";
+        String insertBreed = "INSERT INTO diseases (common_name, scientific_name) VALUES(?, ?);";
+
+        try {
+            if (disease.getCommon_name().isEmpty() && disease.getScientific_name().isEmpty()) {
+                System.out.println("Не все поля заполнены.");
+                return;
+            }
+
+            PreparedStatement usernameCheckSt = getDbConnection().prepareStatement(usernameCheck);
+            usernameCheckSt.setString(1, disease.getCommon_name());
+            usernameCheckSt.setString(2, disease.getScientific_name());
+            ResultSet usernameCheckRes = usernameCheckSt.executeQuery();
+            if (usernameCheckRes.next()) {
+                System.out.println("Заболевание уже существует.");
+                return;
+            }
+
+            PreparedStatement prSt = getDbConnection().prepareStatement(insertBreed);
+            prSt.setString(1, disease.getCommon_name());
+            prSt.setString(2, disease.getScientific_name());
+            int result = prSt.executeUpdate();
+
+            if (result == 0) {
+                System.out.println("Не удалось добавить заболевание.");
+            } else {
+                System.out.println("Новое заболевание успешно добавлено.");
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    public void deleteDisease(Diseases disease) {
+        String idCheck = "SELECT id FROM diseases WHERE common_name = ? AND scientific_name = ?";
+        String deleteBreed = "DELETE FROM diseases WHERE id = ?";
+
+        try {
+            if (disease.getCommon_name().isEmpty() && disease.getScientific_name().isEmpty()) {
+                System.out.println("Не все поля заполнены.");
+                return;
+            }
+
+            PreparedStatement idCheckStatement = getDbConnection().prepareStatement(idCheck);
+            idCheckStatement.setString(1, disease.getCommon_name());
+            idCheckStatement.setString(2, disease.getScientific_name());
+            ResultSet idCheckResultSet = idCheckStatement.executeQuery();
+            if (!idCheckResultSet.next()) {
+                System.out.println("Заболевание не найдено.");
+                return;
+            }
+            int breedId = idCheckResultSet.getInt("id");
+
+            PreparedStatement deleteBreedStatement = getDbConnection().prepareStatement(deleteBreed);
+            deleteBreedStatement.setInt(1, breedId);
+            int result = deleteBreedStatement.executeUpdate();
+
+            if (result == 0) {
+                System.out.println("Не удалось удалить заболевание.");
+            } else {
+                System.out.println("Заболевание успешно удалено.");
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

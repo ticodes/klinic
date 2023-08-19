@@ -49,9 +49,8 @@
         <children>
             <TableView fx:id="tableAnimals" layoutX="264.0" layoutY="-2.0" prefHeight="562.0" prefWidth="628.0">
                 <columns>
-                    <TableColumn fx:id="name" prefWidth="149.5999755859375" text="Имя" />
-                    <TableColumn fx:id="breed" prefWidth="224.00003051757812" text="Порода" />
-                    <TableColumn fx:id="owner" prefWidth="249.5999755859375" text="Владелец" />
+                    <TableColumn fx:id="name" prefWidth="220.79998779296875" text="Имя" />
+                    <TableColumn fx:id="breed" prefWidth="399.1999206542969" text="Порода" />
                 </columns>
             </TableView>
             <TextField fx:id="fieldName" layoutX="14.0" layoutY="88.0" prefHeight="27.0" prefWidth="230.0" />

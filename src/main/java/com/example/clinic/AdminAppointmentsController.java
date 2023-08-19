@@ -52,6 +52,10 @@ public class AdminAppointmentsController {
     @FXML
     private Button delete;
     @FXML
+    private TableColumn<Appointments, String> diseaseColumn;
+    @FXML
+    private ChoiceBox<String> diseaseField;
+    @FXML
     private Button diseases;
     @FXML
     private TableColumn<Appointments, String> doctor;
@@ -88,9 +92,9 @@ public class AdminAppointmentsController {
         getDataField();
 
         add.setOnAction(event -> {
-            if(!fielddate.getValue().equals("") && !fieldtime.getText().isEmpty() && !fieldAnimal.getValue().isEmpty() && !fieldDoctor.getValue().isEmpty()) {
+            if(!fielddate.getValue().equals("") && !fieldtime.getText().isEmpty() && !fieldAnimal.getValue().isEmpty() && !fieldDoctor.getValue().isEmpty() && !diseaseField.getValue().isEmpty()) {
                 try {
-                    appoint.addAppointment(new Appointments( String.valueOf(fielddate.getValue()), fieldtime.getText(), fieldDoctor.getValue(), fieldAnimal.getValue(), fieldAnimal.getValue()));
+                    appoint.addAppointment(new Appointments( String.valueOf(fielddate.getValue()), fieldtime.getText(), fieldDoctor.getValue(), fieldAnimal.getValue(), fieldAnimal.getValue(), diseaseField.getValue()));
                     initialize();
                     fieldtime.clear();
                     fielddate.setValue(null);
@@ -118,6 +122,7 @@ public class AdminAppointmentsController {
 
         fillChoiseDoctor();
         fillChoiseAnimal();
+        fillChoiseDisease();
         account();
         administrators();
         doctors();
@@ -175,6 +180,7 @@ public class AdminAppointmentsController {
         configureColumn(doctor, "doctor");
         configureColumn(owner, "owner");
         configureColumn(animal, "animal");
+        configureColumn(diseaseColumn, "disease");
         tableappointment.setItems(appoint.getObservableList());
     }
     public void animals(){
@@ -198,6 +204,7 @@ public class AdminAppointmentsController {
                 fieldtime.setText(appointment.getTime());
                 fieldDoctor.setValue(appointment.getDoctor());
                 fieldAnimal.setValue(appointment.getAnimal() + ". " + appointment.getOwner());
+                diseaseField.setValue(appointment.getDisease());
             }
         });
     }
@@ -220,6 +227,16 @@ public class AdminAppointmentsController {
             String columnValue = animal.getName() + " - " + animal.getBreed() + ". " + animal.getOwner();
             columnValues.add(columnValue);
             fieldAnimal.setItems(columnValues);
+        }
+    }
+    public void fillChoiseDisease(){
+        List<Diseases> diseases = dbHandler.getTableDiseases();
+        ObservableList<String> columnValues = FXCollections.observableArrayList();
+
+        for (Diseases disease : diseases) {
+            String columnValue = disease.getScientific_name();
+            columnValues.add(columnValue);
+            diseaseField.setItems(columnValues);
         }
     }
 }

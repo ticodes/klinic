@@ -46,10 +46,10 @@
         <children>
             <TableView fx:id="tableappointment" layoutY="-2.0" prefHeight="562.0" prefWidth="892.0">
                 <columns>
-                    <TableColumn fx:id="datetime" prefWidth="164.0000057220459" text="Дата и время" />
-                    <TableColumn fx:id="doctor" prefWidth="262.39996337890625" text="Доктор" />
-                    <TableColumn fx:id="owner" prefWidth="235.99996948242188" text="Владелец" />
-                    <TableColumn fx:id="animal" prefWidth="223.2000732421875" text="Животное" />
+                    <TableColumn fx:id="datetime" prefWidth="134.39999961853027" text="Дата и время" />
+                    <TableColumn fx:id="doctor" prefWidth="209.60000610351562" text="Доктор" />
+                    <TableColumn fx:id="animal" prefWidth="185.59994506835938" text="Животное" />
+                    <TableColumn fx:id="owner" prefWidth="360.0" text="Заболевание" />
                 </columns>
             </TableView>
         </children>

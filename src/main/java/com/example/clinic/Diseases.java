@@ -14,9 +14,19 @@ public class Diseases {
         this.common_name = common_name;
         this.scientific_name = scientific_name;
     }
+    public Diseases(String common_name, String scientific_name) {
+        this.common_name = common_name;
+        this.scientific_name = scientific_name;
+    }
     public ObservableList<Diseases> getObservableList() throws SQLException, ClassNotFoundException {
         diseasesObesrvableList = FXCollections.observableArrayList(DataBaseControl.getInstance().getTableDiseases());
         return diseasesObesrvableList;
+    }
+    public void addDisease(Diseases disease) throws SQLException, ClassNotFoundException {
+        DataBaseControl.getInstance().newDisease(disease);
+    }
+    public void deleteDisease(Diseases disease) throws SQLException, ClassNotFoundException {
+        DataBaseControl.getInstance().deleteDisease(disease);
     }
 
     public String getId() {

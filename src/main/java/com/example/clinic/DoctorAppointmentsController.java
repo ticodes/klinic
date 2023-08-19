@@ -32,7 +32,7 @@ public class DoctorAppointmentsController {
     private Button add;
 
     @FXML
-    private TableColumn<?, ?> animal;
+    private TableColumn<Appointments, String> animal;
 
     @FXML
     private Button animals;
@@ -44,14 +44,17 @@ public class DoctorAppointmentsController {
     private Button breeds;
 
     @FXML
-    private TableColumn<?, ?> datetime;
-
+    private TableColumn<Appointments, String> datetime;
+    @FXML
+    private TableColumn<Appointments, String> diseaseColumn;
+    @FXML
+    private ChoiceBox<String> diseaseField;
     @FXML
     private Button delete;
     @FXML
     private Button diseases;
     @FXML
-    private TableColumn<?, ?> doctor;
+    private TableColumn<Appointments, String> doctor;
 
     @FXML
     private ChoiceBox<String> fieldAnimal;
@@ -66,7 +69,7 @@ public class DoctorAppointmentsController {
     private TextField fieldtime;
 
     @FXML
-    private TableColumn<?, ?> owner;
+    private TableColumn<Appointments, String> owner;
 
     @FXML
     private TableView<Appointments> tableappointment;
@@ -79,9 +82,9 @@ public class DoctorAppointmentsController {
         fillTable();
 
         add.setOnAction(event -> {
-            if(!fielddate.getValue().equals("") && !fieldtime.getText().isEmpty() && !fieldAnimal.getValue().isEmpty() && !fieldDoctor.getValue().isEmpty()) {
+            if(!fielddate.getValue().equals("") && !fieldtime.getText().isEmpty() && !fieldAnimal.getValue().isEmpty() && !fieldDoctor.getValue().isEmpty() && !diseaseField.getValue().isEmpty()) {
                 try {
-                    appoint.addAppointment(new Appointments( String.valueOf(fielddate.getValue()), fieldtime.getText(), fieldDoctor.getValue(), fieldAnimal.getValue(), fieldAnimal.getValue()));
+                    appoint.addAppointment(new Appointments( String.valueOf(fielddate.getValue()), fieldtime.getText(), fieldDoctor.getValue(), fieldAnimal.getValue(), fieldAnimal.getValue(), diseaseField.getValue()));
                     initialize();
                     fieldtime.clear();
                     fielddate.setValue(null);
@@ -109,6 +112,7 @@ public class DoctorAppointmentsController {
 
         fillChoiseDoctor();
         fillChoiseAnimal();
+        fillChoiseDisease();
         account();
         animals();
         breeds();
@@ -148,6 +152,7 @@ public class DoctorAppointmentsController {
                 fieldtime.setText(appointment.getTime());
                 fieldDoctor.setValue(appointment.getDoctor());
                 fieldAnimal.setValue(appointment.getAnimal() + ". " + appointment.getOwner());
+                diseaseField.setValue(appointment.getDisease());
             }
         });
     }
@@ -172,6 +177,16 @@ public class DoctorAppointmentsController {
             fieldAnimal.setItems(columnValues);
         }
     }
+    public void fillChoiseDisease(){
+        List<Diseases> diseases = dbHandler.getTableDiseases();
+        ObservableList<String> columnValues = FXCollections.observableArrayList();
+
+        for (Diseases disease : diseases) {
+            String columnValue = disease.getScientific_name();
+            columnValues.add(columnValue);
+            diseaseField.setItems(columnValues);
+        }
+    }
     private <T> void configureColumn(TableColumn<T, ?> column, String property) {
         column.setCellValueFactory(new PropertyValueFactory<>(property));
     }
@@ -191,6 +206,7 @@ public class DoctorAppointmentsController {
         configureColumn(doctor, "doctor");
         configureColumn(owner, "owner");
         configureColumn(animal, "animal");
+        configureColumn(diseaseColumn, "disease");
         tableappointment.setItems(appoint.getObservableList());
     }
 

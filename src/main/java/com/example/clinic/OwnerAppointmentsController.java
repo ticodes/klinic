@@ -80,7 +80,7 @@ public class OwnerAppointmentsController {
         addInfAboutTables();
         configureColumn(datetime, "datetime");
         configureColumn(doctor, "doctor");
-        configureColumn(owner, "owner");
+        configureColumn(owner, "disease");
         configureColumn(animal, "animal");
 
         // Очищаем данные в таблице перед заполнением

@@ -13,6 +13,15 @@ public class Appointments {
     private String datetime;
     private String doctor;
     private String owner;
+    private String disease;
+
+    public String getDisease() {
+        return disease;
+    }
+
+    public void setDisease(String disease) {
+        this.disease = disease;
+    }
 
     public String getOwnerAnimal() {
         return ownerAnimal;
@@ -30,8 +39,15 @@ public class Appointments {
         this.doctor = doctor;
         this.animal = animal;
         this.owner = owner;
-
-
+    }
+    public Appointments(String date, String time, String doctor, String animal, String owner, String datetime, String disease) {
+        this.date = date;
+        this.time = time;
+        this.doctor = doctor;
+        this.animal = animal;
+        this.owner = owner;
+        this.disease = disease;
+        this.datetime = datetime;
     }
 
     public String getDatetime() {
@@ -42,13 +58,13 @@ public class Appointments {
         this.datetime = datetime;
     }
 
-    public Appointments(String date, String time , String doctor, String owner, String animal, String datetime) {
+    public Appointments(String date, String time , String doctor, String owner, String animal, String disease) {
         this.date = date;
         this.time = time;
         this.doctor = doctor;
         this.owner = owner;
         this.animal = animal;
-        this.datetime = datetime;
+        this.disease = disease;
     }
     public Appointments(){
 

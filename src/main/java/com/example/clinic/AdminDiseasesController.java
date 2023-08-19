@@ -70,6 +70,34 @@ public class AdminDiseasesController {
         fillTable();
         getDataField();
         administrators();
+        add.setOnAction(event -> {
+            if(!fieldName.getText().isEmpty()) {
+                try {
+                    disease.addDisease(new Diseases(fieldName.getText(), scientific_name.getText()));
+                    initialize();
+                    fieldName.clear();
+                    scientific_name.clear();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                } catch (ClassNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+        delete.setOnAction(event -> {
+            if(!fieldName.getText().isEmpty()) {
+                try {
+                    disease.deleteDisease(new Diseases(fieldName.getText(), scientific_name.getText()));
+                    initialize();
+                    fieldName.clear();
+                    scientific_name.clear();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                } catch (ClassNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
         doctors();
         owners();
         appointments();

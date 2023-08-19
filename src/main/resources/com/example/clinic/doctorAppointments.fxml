@@ -5,6 +5,7 @@
 <?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
@@ -61,17 +62,22 @@
     </HBox>
     <AnchorPane prefHeight="562.0" prefWidth="892.0">
         <children>
-            <TableView fx:id="tableappointment" layoutX="264.0" layoutY="-2.0" prefHeight="562.0" prefWidth="628.0">
-                <columns>
-                    <TableColumn fx:id="datetime" prefWidth="125.60003662109375" text="Дата и время" />
-                    <TableColumn fx:id="doctor" prefWidth="184.0" text="Доктор" />
-                    <TableColumn fx:id="owner" prefWidth="159.99993896484375" text="Владелец" />
-                    <TableColumn fx:id="animal" prefWidth="154.4000244140625" text="Животное" />
-                </columns>
-            </TableView>
+         <ScrollPane layoutX="261.0" layoutY="2.0" prefHeight="562.0" prefWidth="629.0">
+            <content>
+                  <TableView fx:id="tableappointment" prefHeight="562.0" prefWidth="1200.0">
+                      <columns>
+                          <TableColumn fx:id="datetime" prefWidth="122.0" text="Дата и время" />
+                          <TableColumn fx:id="doctor" prefWidth="200.0" text="Доктор" />
+                          <TableColumn fx:id="owner" prefWidth="210.0" text="Владелец" />
+                          <TableColumn fx:id="animal" prefWidth="200.0" text="Животное" />
+                     <TableColumn fx:id="diseaseColumn" prefWidth="480.0" text="Заболевание" />
+                      </columns>
+                  </TableView>
+            </content>
+         </ScrollPane>
             <TextField fx:id="fieldtime" layoutX="14.0" layoutY="158.0" prefHeight="27.0" prefWidth="230.0" />
-            <Button fx:id="add" layoutX="73.0" layoutY="372.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="118.0" text="Добавить" />
-            <Button fx:id="delete" layoutX="73.0" layoutY="414.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="118.0" text="Удалить" />
+            <Button fx:id="add" layoutX="73.0" layoutY="445.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="118.0" text="Добавить" />
+            <Button fx:id="delete" layoutX="73.0" layoutY="487.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="118.0" text="Удалить" />
             <Label layoutX="17.0" layoutY="70.0" text="Дата" />
             <Label layoutX="17.0" layoutY="140.0" text="Время" />
             <Label layoutX="17.0" layoutY="210.0" text="Доктор" />
@@ -79,6 +85,8 @@
             <DatePicker fx:id="fielddate" layoutX="14.0" layoutY="88.0" prefHeight="27.0" prefWidth="230.0" />
             <ChoiceBox fx:id="fieldDoctor" layoutX="17.0" layoutY="228.0" prefHeight="27.0" prefWidth="230.0" />
             <ChoiceBox fx:id="fieldAnimal" layoutX="17.0" layoutY="307.0" prefHeight="27.0" prefWidth="230.0" />
+         <Label layoutX="16.0" layoutY="362.0" text="Заболевание" />
+         <ChoiceBox fx:id="diseaseField" layoutX="14.0" layoutY="380.0" prefHeight="27.0" prefWidth="230.0" />
         </children>
     </AnchorPane>
 

@@ -14,43 +14,30 @@ public class DoctorDiseasesController {
 
     @FXML
     private ResourceBundle resources;
-
     @FXML
     private URL location;
-
     @FXML
     private Button account;
-
     @FXML
     private Button add;
-
     @FXML
     private TableColumn<Diseases, String> address;
-
     @FXML
     private Button animals;
-
     @FXML
     private Button appointments;
-
     @FXML
     private Button breeds;
-
     @FXML
     private TableView<Diseases> common_name;
-
     @FXML
     private Button delete;
-
     @FXML
     private Button diseases;
-
     @FXML
     private TextField fieldName;
-
     @FXML
     private TableColumn<Diseases, String> name;
-
     @FXML
     private TextField scientific_name;
     DataBaseControl dbHandler = null;
@@ -64,6 +51,34 @@ public class DoctorDiseasesController {
         breeds();
         account();
         animals();
+        add.setOnAction(event -> {
+            if(!fieldName.getText().isEmpty()) {
+                try {
+                    disease.addDisease(new Diseases(fieldName.getText(), scientific_name.getText()));
+                    initialize();
+                    fieldName.clear();
+                    scientific_name.clear();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                } catch (ClassNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+        delete.setOnAction(event -> {
+            if(!fieldName.getText().isEmpty()) {
+                try {
+                    disease.deleteDisease(new Diseases(fieldName.getText(), scientific_name.getText()));
+                    initialize();
+                    fieldName.clear();
+                    scientific_name.clear();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                } catch (ClassNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
 
     }
     private <T> void configureColumn(TableColumn<T, ?> column, String property) {

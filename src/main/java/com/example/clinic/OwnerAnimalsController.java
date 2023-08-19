@@ -51,9 +51,6 @@ public class OwnerAnimalsController {
     private TableColumn<Animals, String> name;
 
     @FXML
-    private TableColumn<Animals, String> owner;
-
-    @FXML
     private TableView<Animals> tableAnimals;
     DataBaseControl dbHandler = null;
     Animals animal = new Animals();
@@ -132,7 +129,6 @@ public class OwnerAnimalsController {
         addInfAboutTables();
         configureColumn(name, "name");
         configureColumn(breed, "breed");
-        configureColumn(owner, "owner");
 
         // Очищаем данные в таблице перед заполнением
         tableAnimals.getItems().clear();
