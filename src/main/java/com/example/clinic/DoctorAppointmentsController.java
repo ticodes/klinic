@@ -48,7 +48,8 @@ public class DoctorAppointmentsController {
 
     @FXML
     private Button delete;
-
+    @FXML
+    private Button diseases;
     @FXML
     private TableColumn<?, ?> doctor;
 
@@ -111,6 +112,7 @@ public class DoctorAppointmentsController {
         account();
         animals();
         breeds();
+        diseases();
     }
 
     public void account(){
@@ -122,6 +124,12 @@ public class DoctorAppointmentsController {
     public void animals(){
         animals.setOnAction(event -> {
             Window.changeWindow(event, "doctorAnimals.fxml", "Ветеринарная клиника");
+
+        });
+    }
+    public void diseases(){
+        diseases.setOnAction(event -> {
+            Window.changeWindow(event, "doctorDiseases.fxml", "Ветеринарная клиника");
 
         });
     }

@@ -1059,4 +1059,26 @@ public class DataBaseControl {
             throw new RuntimeException(e);
         }
     }
+    public List<Diseases> getTableDiseases() {
+        List<Diseases> diseases = new ArrayList<>();
+        ResultSet resultSet = null;
+        String select = "SELECT * FROM diseases";
+
+        try {
+            PreparedStatement prSt = getInstance().getDbConnection().prepareStatement(select);
+
+            resultSet = prSt.executeQuery();
+            while (resultSet.next()) {
+                String id = resultSet.getString("id");
+                String common_name = resultSet.getString("common_name");
+                String scientific_name = resultSet.getString("scientific_name");
+                Diseases diseas = new Diseases(id, common_name, scientific_name);
+                diseases.add(diseas);
+            }
+        } catch (SQLException | ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+
+        return diseases;
+    }
 }

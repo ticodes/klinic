@@ -46,7 +46,8 @@ public class AdminAnimalsController {
     private Button breeds;
     @FXML
     private Button delete;
-
+    @FXML
+    private Button diseases;
     @FXML
     private Button doctors;
 
@@ -113,6 +114,7 @@ public class AdminAnimalsController {
         appointments();
         breeds();
         account();
+        diseases();
     }
     private <T> void configureColumn(TableColumn<T, ?> column, String property) {
         column.setCellValueFactory(new PropertyValueFactory<>(property));
@@ -138,6 +140,12 @@ public class AdminAnimalsController {
     public void administrators(){
         administrators.setOnAction(event -> {
             Window.changeWindow(event, "adminAdministrators.fxml", "Ветеринарная клиника");
+
+        });
+    }
+    public void diseases(){
+        diseases.setOnAction(event -> {
+            Window.changeWindow(event, "adminDiseases.fxml", "Ветеринарная клиника");
 
         });
     }

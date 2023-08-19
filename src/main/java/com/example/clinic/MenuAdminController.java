@@ -54,6 +54,8 @@ public class MenuAdminController {
 
     @FXML
     private Button save;
+    @FXML
+    private Button diseases;
 
     @FXML
     private TextField secondName;
@@ -88,6 +90,7 @@ public class MenuAdminController {
         appointments();
         animals();
         breeds();
+        diseases();
 
     }
     public void exit(){
@@ -142,6 +145,12 @@ public class MenuAdminController {
     public void breeds(){
         breeds.setOnAction(event -> {
             Window.changeWindow(event, "adminBreeds.fxml", "Ветеринарная клиника");
+
+        });
+    }
+    public void diseases(){
+        diseases.setOnAction(event -> {
+            Window.changeWindow(event, "adminDiseases.fxml", "Ветеринарная клиника");
 
         });
     }

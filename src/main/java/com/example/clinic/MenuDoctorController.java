@@ -30,7 +30,8 @@ public class MenuDoctorController {
 
     @FXML
     private Button breeds;
-
+    @FXML
+    private Button diseases;
     @FXML
     private Button exit;
 
@@ -57,6 +58,7 @@ public class MenuDoctorController {
         animals();
         breeds();
         exit();
+        diseases();
         save.setOnAction(event -> {
             if(!name.getText().isEmpty() && !address.getText().isEmpty() && !telephone.getText().isEmpty() && !login.getText().isEmpty() && !password.getText().isEmpty()) {
                 try {
@@ -90,6 +92,12 @@ public class MenuDoctorController {
     public void appointments(){
         appointments.setOnAction(event -> {
             Window.changeWindow(event, "doctorAppointments.fxml", "Ветеринарная клиника");
+
+        });
+    }
+    public void diseases(){
+        diseases.setOnAction(event -> {
+            Window.changeWindow(event, "doctorDiseases.fxml", "Ветеринарная клиника");
 
         });
     }

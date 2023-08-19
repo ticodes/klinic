@@ -41,7 +41,8 @@ public class AdminOwnersController {
     private Button breeds;
     @FXML
     private Button delete;
-
+    @FXML
+    private Button diseases;
     @FXML
     private Button doctors;
 
@@ -123,6 +124,7 @@ public class AdminOwnersController {
         appointments();
         animals();
         breeds();
+        diseases();
 
     }
     public void account(){
@@ -146,6 +148,12 @@ public class AdminOwnersController {
     public void appointments(){
         appointments.setOnAction(event -> {
             Window.changeWindow(event, "adminAppointments.fxml", "Ветеринарная клиника");
+
+        });
+    }
+    public void diseases(){
+        diseases.setOnAction(event -> {
+            Window.changeWindow(event, "adminDiseases.fxml", "Ветеринарная клиника");
 
         });
     }

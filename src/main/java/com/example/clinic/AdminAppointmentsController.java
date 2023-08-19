@@ -51,7 +51,8 @@ public class AdminAppointmentsController {
 
     @FXML
     private Button delete;
-
+    @FXML
+    private Button diseases;
     @FXML
     private TableColumn<Appointments, String> doctor;
 
@@ -123,7 +124,7 @@ public class AdminAppointmentsController {
         owners();
         animals();
         breeds();
-
+        diseases();
     }
     public void account(){
         account.setOnAction(event -> {
@@ -140,6 +141,12 @@ public class AdminAppointmentsController {
     public void doctors(){
         doctors.setOnAction(event -> {
             Window.changeWindow(event, "adminDoctors.fxml", "Ветеринарная клиника");
+
+        });
+    }
+    public void diseases(){
+        diseases.setOnAction(event -> {
+            Window.changeWindow(event, "adminDiseases.fxml", "Ветеринарная клиника");
 
         });
     }

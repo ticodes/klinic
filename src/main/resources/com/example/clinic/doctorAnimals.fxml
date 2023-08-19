@@ -21,7 +21,7 @@
         <children>
             <Button fx:id="account" mnemonicParsing="false" style="-fx-background-color: #DCC7AA;" text="Личный кабинет">
                 <HBox.margin>
-                    <Insets left="10.0" right="400.0" />
+                    <Insets right="250.0" />
                 </HBox.margin>
                 <font>
                     <Font size="13.0" />
@@ -47,7 +47,15 @@
                 <font>
                     <Font size="13.0" />
                 </font>
+            <HBox.margin>
+               <Insets right="20.0" />
+            </HBox.margin>
             </Button>
+         <Button fx:id="diseases" layoutX="704.0" layoutY="10.0" mnemonicParsing="false" style="-fx-background-color: #DCC7AA;" text="Заболевания">
+            <font>
+               <Font size="13.0" />
+            </font>
+         </Button>
         </children>
     </HBox>
     <AnchorPane prefHeight="562.0" prefWidth="892.0">

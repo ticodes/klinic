@@ -35,7 +35,8 @@ public class DoctorBreedsController {
 
     @FXML
     private Button delete;
-
+    @FXML
+    private Button diseases;
     @FXML
     private TextField fieldName;
 
@@ -85,6 +86,7 @@ public class DoctorBreedsController {
         appointments();
         animals();
         account();
+        diseases();
     }
 
     private <T> void configureColumn(TableColumn<T, ?> column, String property) {
@@ -110,6 +112,12 @@ public class DoctorBreedsController {
     public void appointments(){
         appointments.setOnAction(event -> {
             Window.changeWindow(event, "doctorAppointments.fxml", "Ветеринарная клиника");
+
+        });
+    }
+    public void diseases(){
+        diseases.setOnAction(event -> {
+            Window.changeWindow(event, "doctorDiseases.fxml", "Ветеринарная клиника");
 
         });
     }
