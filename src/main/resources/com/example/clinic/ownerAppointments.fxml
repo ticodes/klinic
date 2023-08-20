@@ -49,7 +49,7 @@
                     <TableColumn fx:id="datetime" prefWidth="134.39999961853027" text="Дата и время" />
                     <TableColumn fx:id="doctor" prefWidth="209.60000610351562" text="Доктор" />
                     <TableColumn fx:id="animal" prefWidth="185.59994506835938" text="Животное" />
-                    <TableColumn fx:id="owner" prefWidth="360.0" text="Заболевание" />
+                    <TableColumn fx:id="owner" prefWidth="500.0" text="Заболевание" />
                 </columns>
             </TableView>
         </children>

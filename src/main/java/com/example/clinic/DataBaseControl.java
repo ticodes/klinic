@@ -209,14 +209,15 @@ public class DataBaseControl {
     public List<Appointments> getTableAppointments() {
         List<Appointments> appointments = new ArrayList<>();
         ResultSet resultSet = null;
+
         String select = "SELECT appointments.*, doctors.name AS doctor_name, doctors.telephone AS doctor_telephone, owners.name AS owner_name, owners.telephone AS owner_telephone, animals.name AS animal_name, breeds.name AS breed_name, GROUP_CONCAT(diseases.scientific_name SEPARATOR ', ') AS concatenated_diseases " +
                 "FROM appointments " +
                 "JOIN doctors ON doctors.id = appointments.id_doctor " +
-                "JOIN owners ON owners.id = appointments.id_owner " +
                 "JOIN animals ON animals.id = appointments.id_animal " +
                 "JOIN breeds ON breeds.id = animals.id_breed " +
-                "JOIN appointment_disease ON appointment_disease.id_appointment = appointments.id " +
-                "JOIN diseases ON diseases.id = appointment_disease.id_disease " +
+                "LEFT JOIN owners ON owners.id = appointments.id_owner " +
+                "LEFT JOIN appointment_disease ON appointment_disease.id_appointment = appointments.id " +
+                "LEFT JOIN diseases ON diseases.id = appointment_disease.id_disease " +
                 "GROUP BY appointments.id";
 
         try {
@@ -229,6 +230,7 @@ public class DataBaseControl {
                 String datetime = resultSet.getString("date") + " " + resultSet.getString("time");
                 String doctor = resultSet.getString("doctor_name") + ", " + resultSet.getString("doctor_telephone");
                 String owner = resultSet.getString("owner_name") + ", " + resultSet.getString("owner_telephone");
+                owner = (owner == null) ? "Без хозяина" : owner.replaceAll("null, null", "Без хозяина");
                 String animal = resultSet.getString("animal_name") + " - " + resultSet.getString("breed_name");
                 String diseases = resultSet.getString("concatenated_diseases");
                 Appointments appointment = new Appointments(date, time, doctor, animal, owner, datetime, diseases);
@@ -264,7 +266,8 @@ public class DataBaseControl {
     public List<Animals> getTableAnimals() {
         List<Animals> animals = new ArrayList<>();
         ResultSet resultSet = null;
-        String select = "SELECT * FROM animals JOIN breeds ON animals.id_breed = breeds.id JOIN owners ON owners.id = animals.id_owner";
+        String select = "SELECT animals.name, breeds.name AS breed, IFNULL(CONCAT(owners.name, ', ', owners.telephone), 'Без хозяина') AS owner FROM animals " +
+                "JOIN breeds ON animals.id_breed = breeds.id LEFT JOIN owners ON owners.id = animals.id_owner";
 
         try {
             PreparedStatement prSt = getInstance().getDbConnection().prepareStatement(select);
@@ -272,15 +275,14 @@ public class DataBaseControl {
             resultSet = prSt.executeQuery();
             while (resultSet.next()) {
                 String name = resultSet.getString("animals.name");
-                String breed = resultSet.getString("breeds.name");
-                String owner = resultSet.getString("owners.name") + ", " + resultSet.getString("owners.telephone");
+                String breed = resultSet.getString("breed");
+                String owner = resultSet.getString("owner");
                 Animals animal = new Animals(name, breed, owner);
                 animals.add(animal);
             }
         } catch (SQLException | ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
-
         return animals;
     }
     public void addAnimal(Animals animal) {
@@ -297,17 +299,19 @@ public class DataBaseControl {
                 throw new IllegalArgumentException("Порода с названием " + animal.getBreed() + " не существует.");
             }
 
-            // Получаем id хозяина по его имени и телефону
-            String selectOwnerId = "SELECT id FROM owners WHERE name = ? AND telephone = ?";
-            PreparedStatement ownerIdStatement = getInstance().getDbConnection().prepareStatement(selectOwnerId);
-            ownerIdStatement.setString(1, animal.getOwner().split(", ")[0]); // Имя хозяина
-            ownerIdStatement.setString(2, animal.getOwner().split(", ")[1]); // Телефон хозяина
-            ResultSet ownerIdResultSet = ownerIdStatement.executeQuery();
+            // Получаем id хозяина по его имени и телефону (если owner не равно null)
             int ownerId = 0;
-            if (ownerIdResultSet.next()) {
-                ownerId = ownerIdResultSet.getInt("id");
-            } else {
-                throw new IllegalArgumentException("Хозяин с именем и телефоном " + animal.getOwner() + " не найден.");
+            if (animal.getOwner() != null) {
+                String selectOwnerId = "SELECT id FROM owners WHERE name = ? AND telephone = ?";
+                PreparedStatement ownerIdStatement = getInstance().getDbConnection().prepareStatement(selectOwnerId);
+                ownerIdStatement.setString(1, animal.getOwner().split(", ")[0]); // Имя хозяина
+                ownerIdStatement.setString(2, animal.getOwner().split(", ")[1]); // Телефон хозяина
+                ResultSet ownerIdResultSet = ownerIdStatement.executeQuery();
+                if (ownerIdResultSet.next()) {
+                    ownerId = ownerIdResultSet.getInt("id");
+                } else {
+                    throw new IllegalArgumentException("Хозяин с именем и телефоном " + animal.getOwner() + " не найден.");
+                }
             }
 
             // Проверяем, нет ли уже точно такой же записи в таблице animals
@@ -326,7 +330,11 @@ public class DataBaseControl {
             String insertAnimal = "INSERT INTO animals (id_breed, id_owner, name) VALUES (?, ?, ?)";
             PreparedStatement insertAnimalStatement = getInstance().getDbConnection().prepareStatement(insertAnimal, Statement.RETURN_GENERATED_KEYS);
             insertAnimalStatement.setInt(1, breedId);
-            insertAnimalStatement.setInt(2, ownerId);
+            if (ownerId != 0) {
+                insertAnimalStatement.setInt(2, ownerId);
+            } else {
+                insertAnimalStatement.setNull(2, java.sql.Types.INTEGER);
+            }
             insertAnimalStatement.setString(3, animal.getName());
             int rowsAffected = insertAnimalStatement.executeUpdate();
             if (rowsAffected == 1) {
@@ -508,16 +516,28 @@ public class DataBaseControl {
             }
 
             // Получаем id владельца по его имени и телефону
-            String selectOwnerId = "SELECT id FROM owners WHERE name = ? AND telephone = ?";
-            PreparedStatement ownerIdStatement = getDbConnection().prepareStatement(selectOwnerId);
-            ownerIdStatement.setString(1, appointment.getAnimal().split(" - ")[1].split("\\. ")[1].split(", ")[0]);
-            ownerIdStatement.setString(2, appointment.getAnimal().split(" - ")[1].split("\\. ")[1].split(", ")[1]);
-            ResultSet ownerIdResultSet = ownerIdStatement.executeQuery();
-            int ownerId;
-            if (ownerIdResultSet.next()) {
-                ownerId = ownerIdResultSet.getInt("id");
+            String ownerData = appointment.getAnimal().split(" - ")[1].split("\\. ")[1];
+            String ownerName;
+            String ownerTelephone;
+            Integer ownerId;
+
+            if (ownerData.equals("Без хозяина")) {
+                ownerId = null;
             } else {
-                throw new IllegalArgumentException("Владелец с именем " + appointment.getAnimal().split(" - ")[1].split("\\. ")[1].split(", ")[0] + " и номером телефона " + appointment.getAnimal().split(" - ")[1].split("\\. ")[1].split(", ")[1] + " не найден.");
+                ownerName = ownerData.split(", ")[0];
+                ownerTelephone = ownerData.split(", ")[1];
+
+                String selectOwnerId = "SELECT id FROM owners WHERE name = ? AND telephone = ?";
+                PreparedStatement ownerIdStatement = getDbConnection().prepareStatement(selectOwnerId);
+                ownerIdStatement.setString(1, ownerName);
+                ownerIdStatement.setString(2, ownerTelephone);
+                ResultSet ownerIdResultSet = ownerIdStatement.executeQuery();
+
+                if (ownerIdResultSet.next()) {
+                    ownerId = ownerIdResultSet.getInt("id");
+                } else {
+                    throw new IllegalArgumentException("Владелец с именем " + ownerName + " и номером телефона " + ownerTelephone + " не найден.");
+                }
             }
 
             // Получаем id доктора по его имени и телефону
@@ -532,6 +552,7 @@ public class DataBaseControl {
             } else {
                 throw new IllegalArgumentException("Доктор с именем " + appointment.getDoctor().split(", ")[0] + " и номером телефона " + appointment.getDoctor().split(", ")[1] + " не найден.");
             }
+
             // Получаем id заболевания по его научному названию
             String selectDiseaseId = "SELECT id FROM diseases WHERE scientific_name = ?";
             PreparedStatement diseaseIdStatement = getDbConnection().prepareStatement(selectDiseaseId);
@@ -545,43 +566,74 @@ public class DataBaseControl {
             }
 
             String date = appointment.getDate();
+            String time = appointment.getTime();
 
-            // Добавляем новый прием в таблицу appointments
-            String insertAppointment = "INSERT INTO appointments (id_animal, id_owner, id_doctor, date, time) VALUES (?, ?, ?, ?, ?)";
-            PreparedStatement insertAppointmentStatement = getDbConnection().prepareStatement(insertAppointment);
-            insertAppointmentStatement.setInt(1, breedId);
-            insertAppointmentStatement.setInt(2, ownerId);
-            insertAppointmentStatement.setInt(3, doctorId);
-            insertAppointmentStatement.setString(4, date);
-            insertAppointmentStatement.setString(5, appointment.getTime());
-            int result = insertAppointmentStatement.executeUpdate();
+            // Проверяем, существует ли запись с такой датой, временем и доктором
+            String selectExistingAppointment = "SELECT id FROM appointments WHERE date = ? AND time = ? AND id_doctor = ?";
+            PreparedStatement existingAppointmentStatement = getDbConnection().prepareStatement(selectExistingAppointment);
+            existingAppointmentStatement.setString(1, date);
+            existingAppointmentStatement.setString(2, time);
+            existingAppointmentStatement.setInt(3, doctorId);
+            ResultSet existingAppointmentResultSet = existingAppointmentStatement.executeQuery();
 
-            if (result == 1) {
-                System.out.println("Новый прием успешно добавлен.");
+            if (existingAppointmentResultSet.next()) {
+                //System.out.println("Запись с такой датой, временем и доктором уже существует.");
+                // Получаем id приема
+                String selectAppointmentId = "SELECT id FROM appointments WHERE date = ? AND time = ? AND id_doctor = ?";
+                PreparedStatement appointmentIdStatement = getDbConnection().prepareStatement(selectAppointmentId);
+                appointmentIdStatement.setString(1, date);
+                appointmentIdStatement.setString(2, time);
+                appointmentIdStatement.setInt(3, doctorId);
+                ResultSet appointmentIdResultSet = appointmentIdStatement.executeQuery();
+                int appointmentId;
+                if (appointmentIdResultSet.next()) {
+                    appointmentId = appointmentIdResultSet.getInt("id");
+                } else {
+                    throw new IllegalArgumentException("Прием не найден.");
+                }
+                // Добавляем новый прием в таблицу appointment_disease
+                String insertAppointmentDisease = "INSERT INTO appointment_disease (id_appointment, id_disease) VALUES (?, ?)";
+                PreparedStatement insertAppointmentDiseaseStatement = getDbConnection().prepareStatement(insertAppointmentDisease);
+                insertAppointmentDiseaseStatement.setInt(1, appointmentId);
+                insertAppointmentDiseaseStatement.setInt(2, diseaseId);
+                int result2 = insertAppointmentDiseaseStatement.executeUpdate();
             } else {
-                System.out.println("Не удалось добавить новый прием.");
-            }
+                // Добавляем новый прием в таблицу appointments
+                String insertAppointment = "INSERT INTO appointments (id_animal, id_owner, id_doctor, date, time) VALUES (?, ?, ?, ?, ?)";
+                PreparedStatement insertAppointmentStatement = getDbConnection().prepareStatement(insertAppointment);
+                insertAppointmentStatement.setInt(1, breedId);
+                insertAppointmentStatement.setObject(2, ownerId);
+                insertAppointmentStatement.setInt(3, doctorId);
+                insertAppointmentStatement.setString(4, date);
+                insertAppointmentStatement.setString(5, time);
+                int result = insertAppointmentStatement.executeUpdate();
 
-            // Получаем id приема
-            String selectAppointmentId = "SELECT id FROM appointments WHERE date = ? AND time = ? AND id_doctor = ?";
-            PreparedStatement appointmentIdStatement = getDbConnection().prepareStatement(selectAppointmentId);
-            appointmentIdStatement.setString(1, date);
-            appointmentIdStatement.setString(2, appointment.getTime());
-            appointmentIdStatement.setInt(3, doctorId);
-            ResultSet appointmentIdResultSet = appointmentIdStatement.executeQuery();
-            int appointmentId;
-            if (appointmentIdResultSet.next()) {
-                appointmentId = appointmentIdResultSet.getInt("id");
-            } else {
-                throw new IllegalArgumentException("Прием не найден.");
-            }
-            // Добавляем новый прием в таблицу appointment_disease
-            String insertAppointmentDisease = "INSERT INTO appointment_disease (id_appointment, id_disease) VALUES (?, ?)";
-            PreparedStatement insertAppointmentDiseaseStatement = getDbConnection().prepareStatement(insertAppointmentDisease);
-            insertAppointmentDiseaseStatement.setInt(1, appointmentId);
-            insertAppointmentDiseaseStatement.setInt(2, diseaseId);
-            int result2 = insertAppointmentDiseaseStatement.executeUpdate();
+                // Получаем id приема
+                String selectAppointmentId = "SELECT id FROM appointments WHERE date = ? AND time = ? AND id_doctor = ?";
+                PreparedStatement appointmentIdStatement = getDbConnection().prepareStatement(selectAppointmentId);
+                appointmentIdStatement.setString(1, date);
+                appointmentIdStatement.setString(2, time);
+                appointmentIdStatement.setInt(3, doctorId);
+                ResultSet appointmentIdResultSet = appointmentIdStatement.executeQuery();
+                int appointmentId;
+                if (appointmentIdResultSet.next()) {
+                    appointmentId = appointmentIdResultSet.getInt("id");
+                } else {
+                    throw new IllegalArgumentException("Прием не найден.");
+                }
+                // Добавляем новый прием в таблицу appointment_disease
+                String insertAppointmentDisease = "INSERT INTO appointment_disease (id_appointment, id_disease) VALUES (?, ?)";
+                PreparedStatement insertAppointmentDiseaseStatement = getDbConnection().prepareStatement(insertAppointmentDisease);
+                insertAppointmentDiseaseStatement.setInt(1, appointmentId);
+                insertAppointmentDiseaseStatement.setInt(2, diseaseId);
+                int result2 = insertAppointmentDiseaseStatement.executeUpdate();
 
+                if (result == 1) {
+                    System.out.println("Новый прием успешно добавлен.");
+                } else {
+                    System.out.println("Не удалось добавить новый прием.");
+                }
+            }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -702,55 +754,85 @@ public class DataBaseControl {
         }
     }
     public void deleteAnimal(Animals animal) {
-        String idOwner = "SELECT id FROM owners WHERE name = ? AND telephone = ?";
         String idBreed = "SELECT id FROM breeds WHERE name = ?";
-        String idCheck = "SELECT id FROM animals WHERE name = ? AND id_owner = ? AND id_breed = ?";
+        String idCheck = "SELECT id FROM animals WHERE name = ? AND id_breed = ?";
         String deleteAnimal = "DELETE FROM animals WHERE id = ?";
 
         try {
-            if (animal.getName().isEmpty() || animal.getOwner().isEmpty() || animal.getBreed().isEmpty()) {
+            if (animal.getName().isEmpty() || animal.getBreed().isEmpty()) {
                 System.out.println("Не все поля заполнены.");
                 return;
             }
 
-            PreparedStatement idCheckOwner = getDbConnection().prepareStatement(idOwner);
-            idCheckOwner.setString(1, animal.getOwner().split(", ")[0]);
-            idCheckOwner.setString(2, animal.getOwner().split(", ")[1]);
-            ResultSet idOwnerResultSet = idCheckOwner.executeQuery();
-            if (!idOwnerResultSet.next()) {
-                System.out.println("Владелец не найден.");
-                return;
-            }
-            int ownerId = idOwnerResultSet.getInt("id");
+            int breedId;
+            if (!animal.getOwner().equals("Без хозяина")) {
+                String idOwner = "SELECT id FROM owners WHERE name = ? AND telephone = ?";
+                PreparedStatement idCheckOwner = getDbConnection().prepareStatement(idOwner);
+                idCheckOwner.setString(1, animal.getOwner().split(", ")[0]);
+                idCheckOwner.setString(2, animal.getOwner().split(", ")[1]);
+                ResultSet idOwnerResultSet = idCheckOwner.executeQuery();
+                if (!idOwnerResultSet.next()) {
+                    System.out.println("Владелец не найден.");
+                    return;
+                }
+                int ownerId = idOwnerResultSet.getInt("id");
 
-            PreparedStatement idCheckBreed = getDbConnection().prepareStatement(idBreed);
-            idCheckBreed.setString(1, animal.getBreed());
-            ResultSet idBreedResultSet = idCheckBreed.executeQuery();
-            if (!idBreedResultSet.next()) {
-                System.out.println("Порода не найдена.");
-                return;
-            }
-            int breedId = idBreedResultSet.getInt("id");
+                PreparedStatement idCheckBreed = getDbConnection().prepareStatement(idBreed);
+                idCheckBreed.setString(1, animal.getBreed());
+                ResultSet idBreedResultSet = idCheckBreed.executeQuery();
+                if (!idBreedResultSet.next()) {
+                    System.out.println("Порода не найдена.");
+                    return;
+                }
+                breedId = idBreedResultSet.getInt("id");
 
-            PreparedStatement idCheckStatement = getDbConnection().prepareStatement(idCheck);
-            idCheckStatement.setString(1, animal.getName());
-            idCheckStatement.setInt(2, ownerId);
-            idCheckStatement.setInt(3, breedId);
-            ResultSet idCheckResultSet = idCheckStatement.executeQuery();
-            if (!idCheckResultSet.next()) {
-                System.out.println("Животное не найдено.");
-                return;
-            }
-            int animalId = idCheckResultSet.getInt("id");
+                PreparedStatement idCheckStatement = getDbConnection().prepareStatement(idCheck);
+                idCheckStatement.setString(1, animal.getName());
+                idCheckStatement.setInt(2, breedId);
+                ResultSet idCheckResultSet = idCheckStatement.executeQuery();
+                if (!idCheckResultSet.next()) {
+                    System.out.println("Животное не найдено.");
+                    return;
+                }
+                int animalId = idCheckResultSet.getInt("id");
 
-            PreparedStatement deleteAnimalStatement = getDbConnection().prepareStatement(deleteAnimal);
-            deleteAnimalStatement.setInt(1, animalId);
-            int result = deleteAnimalStatement.executeUpdate();
+                PreparedStatement deleteAnimalStatement = getDbConnection().prepareStatement(deleteAnimal);
+                deleteAnimalStatement.setInt(1, animalId);
+                int result = deleteAnimalStatement.executeUpdate();
 
-            if (result == 0) {
-                System.out.println("Не удалось удалить животное.");
+                if (result == 0) {
+                    System.out.println("Не удалось удалить животное.");
+                } else {
+                    System.out.println("Животное успешно удалено.");
+                }
             } else {
-                System.out.println("Животное успешно удалено.");
+                PreparedStatement idCheckBreed = getDbConnection().prepareStatement(idBreed);
+                idCheckBreed.setString(1, animal.getBreed());
+                ResultSet idBreedResultSet = idCheckBreed.executeQuery();
+                if (!idBreedResultSet.next()) {
+                    System.out.println("Порода не найдена.");
+                    return;
+                }
+                breedId = idBreedResultSet.getInt("id");
+
+                PreparedStatement idCheckStatement = getDbConnection().prepareStatement(idCheck);
+                idCheckStatement.setString(1, animal.getName());
+                idCheckStatement.setInt(2, breedId);
+                ResultSet idCheckResultSet = idCheckStatement.executeQuery();
+                if (!idCheckResultSet.next()) {
+                    System.out.println("Животное не найдено.");
+                    return;
+                }
+                int animalId = idCheckResultSet.getInt("id");
+                PreparedStatement deleteAnimalStatement = getDbConnection().prepareStatement(deleteAnimal);
+                deleteAnimalStatement.setInt(1, animalId);
+                int result = deleteAnimalStatement.executeUpdate();
+
+                if (result == 0) {
+                    System.out.println("Не удалось удалить животное.");
+                } else {
+                    System.out.println("Животное успешно удалено.");
+                }
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);

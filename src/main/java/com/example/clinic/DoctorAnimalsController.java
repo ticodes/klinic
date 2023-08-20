@@ -71,7 +71,7 @@ public class DoctorAnimalsController {
         getDataField();
 
         add.setOnAction(event -> {
-            if(!fieldName.getText().isEmpty() && !fieldBreed.getValue().isEmpty() && !fieldOwner.getValue().isEmpty()) {
+            if(!fieldName.getText().isEmpty() && !fieldBreed.getValue().isEmpty()) {
                 try {
                     animal.addAnimal(new Animals(fieldName.getText(), fieldBreed.getValue(), fieldOwner.getValue()));
                     initialize();
@@ -89,6 +89,7 @@ public class DoctorAnimalsController {
                     animal.deleteAnimal(new Animals(fieldName.getText(), fieldBreed.getValue(), fieldOwner.getValue()));
                     initialize();
                     fieldName.clear();
+                    fieldOwner.setValue(null);
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
                 } catch (ClassNotFoundException e) {
